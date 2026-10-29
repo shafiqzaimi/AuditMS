@@ -493,8 +493,8 @@
        PAGE VIEW 1: EXECUTIVE GOVERNANCE DASHBOARD
        ======================================================== -->
   <main id="view-dashboard" class="space-y-5">
-    <!-- Executive KPI Cards -->
-    <section class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3.5">
+    <!-- Executive KPI Cards (Realigned to 5 Cards) -->
+    <section class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5">
       <!-- 1. Total Projects -->
       <div class="neu-card p-4 flex flex-col justify-between">
         <div class="flex items-center justify-between text-slate-400">
@@ -549,33 +549,10 @@
             <span id="kpi-total-findings" class="text-2xl font-extrabold text-slate-800 dark:text-slate-100 group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">--</span>
             <i class="fa-solid fa-arrow-up-right-from-square text-xs text-slate-400 group-hover:text-amber-500 transition-transform group-hover:scale-110"></i>
           </button>
-          <span id="kpi-sub-findings" class="text-[11px] text-amber-600 dark:text-amber-400 font-semibold block mt-0.5">
-            Calculating breakdown...
-          </span>
         </div>
       </div>
 
-      <!-- 4. High Risk Findings -->
-      <div class="neu-card p-4 flex flex-col justify-between">
-        <div class="flex items-center justify-between text-slate-400">
-          <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">High Rating Issues</span>
-          <i class="fa-solid fa-fire text-red-500 text-base"></i>
-        </div>
-        <div class="mt-2">
-          <button type="button" 
-                  onclick="document.getElementById('filter-severity').value='High'; applyFilters(); navigateToPage('register'); switchTab('findings');" 
-                  class="cursor-pointer group flex items-center gap-2 text-left focus:outline-none" 
-                  title="Click to filter and view High Rating Findings">
-            <span id="kpi-high-findings" class="text-2xl font-extrabold text-red-600 dark:text-red-400 group-hover:underline transition-colors">--</span>
-            <i class="fa-solid fa-arrow-up-right-from-square text-xs text-red-400 group-hover:text-red-500 transition-transform group-hover:scale-110"></i>
-          </button>
-          <span id="kpi-sub-high" class="text-[11px] text-red-600 dark:text-red-400 font-semibold block mt-0.5">
-            Calculating breakdown...
-          </span>
-        </div>
-      </div>
-
-      <!-- 5. Action Plans -->
+      <!-- 4. Action Plans -->
       <div class="neu-card p-4 flex flex-col justify-between">
         <div class="flex items-center justify-between text-slate-400">
           <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Action Plans</span>
@@ -595,7 +572,7 @@
         </div>
       </div>
 
-      <!-- 6. Finding Closure Rate -->
+      <!-- 5. Finding Closure Rate -->
       <div class="neu-card p-4 flex flex-col justify-between">
         <div class="flex items-center justify-between text-slate-400">
           <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Finding Closure Rate</span>
@@ -610,21 +587,9 @@
       </div>
     </section>
 
-    <!-- Visual Governance Analytics Charts -->
-    <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
-      <!-- Chart 1: Finding Ratings -->
-      <div class="neu-card p-5 flex flex-col">
-        <div class="flex items-center justify-between mb-2">
-          <h2 class="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
-            <i class="fa-solid fa-chart-pie text-red-500 mr-1.5"></i> Finding Ratings
-          </h2>
-        </div>
-        <div class="relative flex-1 flex items-center justify-center min-h-[210px]">
-          <canvas id="chart-severity"></canvas>
-        </div>
-      </div>
-
-      <!-- Chart 2: Audit Opinions -->
+    <!-- Visual Governance Analytics Charts (Realigned to 3 Cards) -->
+    <section class="grid grid-cols-1 md:grid-cols-3 gap-5">
+      <!-- Chart 1: Audit Opinions -->
       <div class="neu-card p-5 flex flex-col">
         <div class="flex items-center justify-between mb-2">
           <h2 class="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
@@ -636,7 +601,7 @@
         </div>
       </div>
 
-      <!-- Chart 3: Action Plan Status -->
+      <!-- Chart 2: Action Plan Status -->
       <div class="neu-card p-5 flex flex-col">
         <div class="flex items-center justify-between mb-2">
           <h2 class="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
@@ -648,7 +613,7 @@
         </div>
       </div>
 
-      <!-- Chart 4: KCDIOM Distribution -->
+      <!-- Chart 3: KCDIOM Distribution -->
       <div class="neu-card p-5 flex flex-col">
         <div class="flex items-center justify-between mb-2">
           <h2 class="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
@@ -760,7 +725,6 @@
               <th class="py-2.5 px-3">Scope ID</th>
               <th class="py-2.5 px-3">Finding Rating</th>
               <th class="py-2.5 px-3">Finding Title</th>
-              <th class="py-2.5 px-3">Issue Details</th>
               <th class="py-2.5 px-3">Management Response</th>
               <th class="py-2.5 px-3 text-center">Actions</th>
               <th class="py-2.5 px-3 text-right">Inspect</th>
@@ -1406,15 +1370,18 @@
       const totalFindings = filteredData.findings.length;
       const totalActions = filteredData.actions.length;
 
-      let highCount = 0;
-      let medCount = 0;
-      let lowCount = 0;
+      // Filter specifically for 2026 Findings
+      const isFinding2026 = (f) => {
+        const p = rawData.projects.find(proj => normalizeKey(proj.audit_id) === normalizeKey(f.audit_id));
+        const yr = p ? String(p.year || '').trim() : (f.finding_id && f.finding_id.includes('26') ? '2026' : '');
+        return yr === '2026';
+      };
 
-      filteredData.findings.forEach(f => {
+      const findings2026 = filteredData.findings.filter(isFinding2026);
+      let high2026Count = 0;
+      findings2026.forEach(f => {
         const rating = classifyFindingRating(f.finding_rating || f.finding_severity);
-        if (rating === 'High') highCount++;
-        else if (rating === 'Medium') medCount++;
-        else if (rating === 'Low') lowCount++;
+        if (rating === 'High') high2026Count++;
       });
 
       const yearCountsMap = {};
@@ -1468,19 +1435,17 @@
       });
 
       const findingClosureRate = totalFindings > 0 ? Math.round((closedFindingsCount / totalFindings) * 100) : 0;
-      const highRatio = totalFindings > 0 ? Math.round((highCount / totalFindings) * 100) : 0;
 
       document.getElementById('kpi-total-projects').innerText = totalProjects;
       document.getElementById('kpi-total-scopes').innerText = totalScopes;
       document.getElementById('kpi-total-findings').innerText = totalFindings;
-      document.getElementById('kpi-high-findings').innerText = highCount;
+      const kpiHigh = document.getElementById('kpi-high-findings');
+      if (kpiHigh) kpiHigh.innerText = high2026Count;
       document.getElementById('kpi-total-actions').innerText = totalActions;
       document.getElementById('kpi-remediation-rate').innerText = `${findingClosureRate}%`;
 
       document.getElementById('kpi-sub-projects').innerHTML = `<i class="fa-solid fa-calendar-check mr-1"></i> ${dynamicYearBreakdown}`;
       document.getElementById('kpi-sub-scopes').innerHTML = `<i class="fa-solid fa-layer-group mr-1"></i> <strong>${scopeRangeStr}</strong>`;
-      document.getElementById('kpi-sub-findings').innerHTML = `<i class="fa-solid fa-layer-group mr-1"></i> <strong>${highCount}</strong> High | <strong>${medCount}</strong> Med | <strong>${lowCount}</strong> Low`;
-      document.getElementById('kpi-sub-high').innerHTML = `<i class="fa-solid fa-fire mr-1"></i> <strong>${highRatio}%</strong> of ${totalFindings} findings`;
       document.getElementById('kpi-sub-actions').innerHTML = `<i class="fa-solid fa-list-check mr-1"></i> <strong>${closedCount}</strong> Closed | <strong>${inProgressCount}</strong> In Progress | <strong>${noActionCount}</strong> No action | <strong>${overdueCount}</strong> Overdue`;
       document.getElementById('kpi-sub-rate').innerHTML = `<i class="fa-solid fa-shield-halved mr-1"></i> ${closedFindingsCount} of ${totalFindings} findings closed`;
 
@@ -1608,7 +1573,7 @@
 
       const findingBody = document.getElementById('table-body-findings');
       if (filteredData.findings.length === 0) {
-        findingBody.innerHTML = `<tr><td colspan="9" class="text-center py-6 text-slate-400">No findings meet parameters.</td></tr>`;
+        findingBody.innerHTML = `<tr><td colspan="8" class="text-center py-6 text-slate-400">No findings meet parameters.</td></tr>`;
       } else {
         findingBody.innerHTML = filteredData.findings.map(f => {
           const fAuditIdNorm = normalizeKey(f.audit_id);
@@ -1618,12 +1583,11 @@
           return `
             <tr>
               <td class="py-2.5 px-3 font-mono font-bold text-amber-600 dark:text-amber-400 text-xs">${f.finding_id}</td>
-              <td class="py-2.5 px-3 font-semibold text-xs max-w-[180px] truncate" title="${parentProject ? parentProject.audit_project_name : f.audit_id}">${parentProject ? parentProject.audit_project_name : f.audit_id}</td>
+              <td class="py-2.5 px-3 font-semibold text-xs max-w-[200px] truncate" title="${parentProject ? parentProject.audit_project_name : f.audit_id}">${parentProject ? parentProject.audit_project_name : f.audit_id}</td>
               <td class="py-2.5 px-3 font-mono text-xs text-slate-500">${f.scope_id || '<span class="text-slate-400 italic">N/A</span>'}</td>
               <td class="py-2.5 px-3">${getRatingBadge(f.finding_rating || f.finding_severity)}</td>
-              <td class="py-2.5 px-3 font-semibold text-slate-800 dark:text-slate-100 max-w-[200px] truncate" title="${f.finding_title}">${f.finding_title || '<span class="text-slate-400 italic">No Title</span>'}</td>
-              <td class="py-2.5 px-3 text-xs text-slate-600 dark:text-slate-400 max-w-[220px] truncate" title="${f.audit_issue_details}">${f.audit_issue_details || '<span class="text-slate-400 italic">No observation</span>'}</td>
-              <td class="py-2.5 px-3 text-xs text-slate-600 dark:text-slate-400 max-w-[200px] truncate" title="${f.management_response}">${f.management_response || '<span class="text-slate-400 italic">Pending</span>'}</td>
+              <td class="py-2.5 px-3 font-semibold text-slate-800 dark:text-slate-100 max-w-[240px] truncate" title="${f.finding_title}">${f.finding_title || '<span class="text-slate-400 italic">No Title</span>'}</td>
+              <td class="py-2.5 px-3 text-xs text-slate-600 dark:text-slate-400 max-w-[220px] truncate" title="${f.management_response}">${f.management_response || '<span class="text-slate-400 italic">Pending</span>'}</td>
               <td class="py-2.5 px-3 text-center"><span class="neu-card-sm px-2 py-0.5 text-xs font-bold text-purple-600 dark:text-purple-400">${actions.length}</span></td>
               <td class="py-2.5 px-3 text-right">
                 <button onclick="viewFindingDetails('${f.finding_id}')" class="neu-button px-2.5 py-1 text-xs text-amber-600 dark:text-amber-400">
@@ -1683,64 +1647,75 @@
       const textColor = isDark ? '#94a3b8' : '#64748b';
       const gridColor = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)';
 
-      let rateHigh = 0;
-      let rateMed = 0;
-      let rateLow = 0;
+      // Safe check for 2026 Finding Ratings chart if present
+      const canvasSev = document.getElementById('chart-severity');
+      if (canvasSev) {
+        const isFinding2026 = (f) => {
+          const p = rawData.projects.find(proj => normalizeKey(proj.audit_id) === normalizeKey(f.audit_id));
+          const yr = p ? String(p.year || '').trim() : (f.finding_id && f.finding_id.includes('26') ? '2026' : '');
+          return yr === '2026';
+        };
 
-      filteredData.findings.forEach(f => {
-        const cat = classifyFindingRating(f.finding_rating || f.finding_severity);
-        if (cat === 'High') rateHigh++;
-        else if (cat === 'Medium') rateMed++;
-        else if (cat === 'Low') rateLow++;
-      });
+        const findings2026 = filteredData.findings.filter(isFinding2026);
+        let rateHigh = 0;
+        let rateMed = 0;
+        let rateLow = 0;
 
-      if (charts.severity) charts.severity.destroy();
-      const ctxSev = document.getElementById('chart-severity').getContext('2d');
-      charts.severity = new Chart(ctxSev, {
-        type: 'doughnut',
-        data: {
-          labels: ['High', 'Medium', 'Low'],
-          datasets: [{
-            data: [rateHigh, rateMed, rateLow],
-            backgroundColor: ['#FF0000', '#FFC000', '#8EAADB'],
-            borderColor: isDark ? '#191d26' : '#ffffff',
-            borderWidth: 2,
-            hoverOffset: 4
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: { 
-              position: 'bottom', 
-              labels: { boxWidth: 12, boxHeight: 12, usePointStyle: true, pointStyle: 'circle', padding: 10, font: { size: 10, weight: '600' } } 
-            },
-            tooltip: {
-              enabled: true,
-              backgroundColor: isDark ? 'rgba(15, 23, 42, 0.96)' : 'rgba(30, 41, 59, 0.96)',
-              titleColor: '#ffffff',
-              bodyColor: '#e2e8f0',
-              borderColor: isDark ? '#334155' : '#cbd5e1',
-              borderWidth: 1,
-              cornerRadius: 10,
-              padding: 10,
-              boxPadding: 6,
-              titleFont: { size: 12, weight: '700' },
-              bodyFont: { size: 11, weight: '500' },
-              callbacks: {
-                title: function(tooltipItems) { return tooltipItems.length ? tooltipItems[0].label + ' Rating' : ''; },
-                label: function(context) {
-                  const total = (rateHigh + rateMed + rateLow) || 1;
-                  const pct = Math.round((context.raw / total) * 100);
-                  return ` ${context.raw} finding(s) (${pct}%)`;
+        findings2026.forEach(f => {
+          const cat = classifyFindingRating(f.finding_rating || f.finding_severity);
+          if (cat === 'High') rateHigh++;
+          else if (cat === 'Medium') rateMed++;
+          else if (cat === 'Low') rateLow++;
+        });
+
+        if (charts.severity) charts.severity.destroy();
+        const ctxSev = canvasSev.getContext('2d');
+        charts.severity = new Chart(ctxSev, {
+          type: 'doughnut',
+          data: {
+            labels: ['High', 'Medium', 'Low'],
+            datasets: [{
+              data: [rateHigh, rateMed, rateLow],
+              backgroundColor: ['#FF0000', '#FFC000', '#8EAADB'],
+              borderColor: isDark ? '#191d26' : '#ffffff',
+              borderWidth: 2,
+              hoverOffset: 4
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { 
+                position: 'bottom', 
+                labels: { boxWidth: 12, boxHeight: 12, usePointStyle: true, pointStyle: 'circle', padding: 10, font: { size: 10, weight: '600' } } 
+              },
+              tooltip: {
+                enabled: true,
+                backgroundColor: isDark ? 'rgba(15, 23, 42, 0.96)' : 'rgba(30, 41, 59, 0.96)',
+                titleColor: '#ffffff',
+                bodyColor: '#e2e8f0',
+                borderColor: isDark ? '#334155' : '#cbd5e1',
+                borderWidth: 1,
+                cornerRadius: 10,
+                padding: 10,
+                boxPadding: 6,
+                titleFont: { size: 12, weight: '700' },
+                bodyFont: { size: 11, weight: '500' },
+                callbacks: {
+                  title: function(tooltipItems) { return tooltipItems.length ? '2026 ' + tooltipItems[0].label + ' Rating' : ''; },
+                  label: function(context) {
+                    const total = (rateHigh + rateMed + rateLow) || 1;
+                    const pct = Math.round((context.raw / total) * 100);
+                    return ` ${context.raw} finding(s) (${pct}%)`;
+                  }
                 }
               }
-            }
-          },
-          cutout: '68%'
-        }
-      });
+            },
+            cutout: '68%'
+          }
+        });
+      }
 
       const opMap = {};
       filteredData.projects.forEach(p => {
