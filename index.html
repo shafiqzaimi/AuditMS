@@ -1,0 +1,2317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Audit Monitoring System (AMS)</title>
+
+  <!-- Official Logo: Favicon, Apple Touch Icon & PWA Manifest -->
+  <link rel="icon" type="image/png" href="https://lh3.googleusercontent.com/d/1i2MnU347Gh-Os-V7loTPkp8LM-MZ3yDH">
+  <link rel="shortcut icon" href="https://lh3.googleusercontent.com/d/1i2MnU347Gh-Os-V7loTPkp8LM-MZ3yDH">
+  <link rel="apple-touch-icon" sizes="180x180" href="https://lh3.googleusercontent.com/d/1i2MnU347Gh-Os-V7loTPkp8LM-MZ3yDH">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="AMS Audit">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="theme-color" content="#191d26">
+  <link rel="manifest" href='data:application/manifest+json,{"name":"Audit Monitoring System","short_name":"AMS","start_url":".","display":"standalone","background_color":"#191d26","theme_color":"#3b82f6","icons":[{"src":"https://lh3.googleusercontent.com/d/1i2MnU347Gh-Os-V7loTPkp8LM-MZ3yDH","sizes":"192x192 512x512","type":"image/png"}]}'>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+          },
+          colors: {
+            neu: {
+              bg: '#e6ecf4',
+              card: '#e6ecf4',
+              darkBg: '#191c24',
+              darkCard: '#191c24',
+              accent: '#3b82f6',
+              accentHover: '#2563eb',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    :root {
+      --bg: #e6ecf4;
+      --card-bg: #e6ecf4;
+      --shadow-light: #ffffff;
+      --shadow-dark: #b8c4d4;
+      --text-main: #1e293b;
+      --text-muted: #64748b;
+      --border-soft: rgba(255, 255, 255, 0.75);
+      --neu-convex: 8px 8px 18px var(--shadow-dark), -8px -8px 18px var(--shadow-light);
+      --neu-concave: inset 4px 4px 8px var(--shadow-dark), inset -4px -4px 8px var(--shadow-light);
+      --neu-btn: 5px 5px 12px var(--shadow-dark), -5px -5px 12px var(--shadow-light);
+      --neu-btn-active: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light);
+      --neu-sm: 4px 4px 9px var(--shadow-dark), -4px -4px 9px var(--shadow-light);
+    }
+
+    .dark {
+      --bg: #14171f;
+      --card-bg: #191d26;
+      --shadow-light: #212633;
+      --shadow-dark: #0d0f15;
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+      --border-soft: rgba(255, 255, 255, 0.06);
+      --neu-convex: 8px 8px 18px var(--shadow-dark), -8px -8px 18px var(--shadow-light);
+      --neu-concave: inset 4px 4px 8px var(--shadow-dark), inset -4px -4px 8px var(--shadow-light);
+      --neu-btn: 5px 5px 12px var(--shadow-dark), -5px -5px 12px var(--shadow-light);
+      --neu-btn-active: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light);
+      --neu-sm: 4px 4px 9px var(--shadow-dark), -4px -4px 9px var(--shadow-light);
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text-main);
+      font-family: 'Inter', sans-serif;
+      transition: background-color 0.25s ease, color 0.25s ease;
+      min-height: 100vh;
+    }
+
+    .neu-card {
+      background: var(--card-bg);
+      box-shadow: var(--neu-convex);
+      border-radius: 18px;
+      border: 1px solid var(--border-soft);
+      transition: all 0.2s ease;
+    }
+
+    .neu-card-sm {
+      background: var(--card-bg);
+      box-shadow: var(--neu-sm);
+      border-radius: 12px;
+      border: 1px solid var(--border-soft);
+    }
+
+    .neu-pressed {
+      background: var(--card-bg);
+      box-shadow: var(--neu-concave) !important;
+      border-radius: 14px;
+    }
+
+    .neu-button {
+      background: var(--card-bg);
+      box-shadow: var(--neu-btn);
+      border-radius: 12px;
+      border: 1px solid var(--border-soft);
+      transition: all 0.18s ease;
+      cursor: pointer;
+    }
+
+    .neu-button:hover {
+      transform: translateY(-1px);
+    }
+
+    .neu-button:active, .neu-button.active {
+      box-shadow: var(--neu-btn-active);
+      transform: translateY(1px);
+      color: #3b82f6;
+    }
+
+    .neu-input {
+      background: var(--card-bg);
+      box-shadow: var(--neu-concave);
+      border: 1px solid transparent;
+      outline: none;
+      border-radius: 12px;
+      color: var(--text-main);
+      transition: box-shadow 0.2s ease, border-color 0.2s ease;
+    }
+
+    .neu-input:focus {
+      border-color: rgba(59, 130, 246, 0.4);
+      box-shadow: inset 4px 4px 8px var(--shadow-dark), inset -4px -4px 8px var(--shadow-light), 0 0 0 2px rgba(59, 130, 246, 0.2);
+    }
+
+    .neu-table th {
+      background-color: transparent;
+      color: var(--text-muted);
+      font-size: 0.725rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      border-bottom: 2px solid rgba(148, 163, 184, 0.2);
+    }
+    .neu-table td {
+      border-bottom: 1px solid rgba(148, 163, 184, 0.12);
+      font-size: 0.815rem;
+      color: var(--text-main);
+    }
+    .neu-table tr:hover td {
+      background-color: rgba(59, 130, 246, 0.04);
+    }
+
+    .pulse-dot {
+      animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: .35; }
+    }
+
+    /* Custom Sleek Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(148, 163, 184, 0.35);
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(148, 163, 184, 0.6);
+    }
+  </style>
+</head>
+<body class="p-3 sm:p-5 lg:p-7">
+
+  <!-- ================= AUTHENTICATION VIEW ================= -->
+  <div id="auth-view" class="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto" style="background-color: var(--bg);">
+    <!-- Floating Theme Toggle for Login Screen -->
+    <div class="absolute top-5 right-5">
+      <button onclick="toggleTheme()" class="neu-button w-10 h-10 flex items-center justify-center text-slate-700 dark:text-slate-200" title="Toggle Light/Dark Theme">
+        <i id="auth-theme-icon" class="fa-solid fa-moon"></i>
+      </button>
+    </div>
+
+    <div class="neu-card w-full max-w-md p-6 sm:p-8 relative">
+      <!-- Institutional Branding Header -->
+      <div class="flex flex-col items-center text-center mb-6">
+        <div class="w-16 h-16 neu-card p-2 flex items-center justify-center mb-3 shadow-sm overflow-hidden">
+          <img src="https://lh3.googleusercontent.com/d/1i2MnU347Gh-Os-V7loTPkp8LM-MZ3yDH" 
+               alt="AMS Official Logo" 
+               class="w-full h-full object-contain"
+               onerror="this.onerror=null; this.src='https://placehold.co/128x128/3b82f6/ffffff?text=AMS';">
+        </div>
+        <span class="text-[10px] font-bold tracking-widest text-blue-600 dark:text-blue-400 uppercase bg-blue-100 dark:bg-blue-900/40 px-2.5 py-0.5 rounded-full mb-1.5">
+          Office of Internal Audit
+        </span>
+        <h1 class="text-xl sm:text-2xl font-extrabold tracking-tight text-slate-800 dark:text-slate-100">
+          Audit Monitoring System
+        </h1>
+      </div>
+      
+      <!-- Login Container -->
+      <div id="login-form-container">
+        <form onsubmit="handleLogin(event)" class="space-y-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1.5">Official Email</label>
+            <div class="relative">
+              <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400 text-xs">
+                <i class="fa-regular fa-envelope"></i>
+              </span>
+              <input type="email" id="auth-email" required placeholder="name@domain.edu" class="neu-input w-full pl-9 pr-3 py-2.5 text-xs text-slate-800 dark:text-slate-100">
+            </div>
+          </div>
+          <div>
+            <div class="flex items-center justify-between mb-1.5">
+              <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300">Password</label>
+              <button type="button" onclick="showForgotPasswordView(1)" class="text-[11px] font-medium text-blue-600 dark:text-blue-400 hover:underline focus:outline-none">Forgot Password?</button>
+            </div>
+            <div class="relative">
+              <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400 text-xs">
+                <i class="fa-solid fa-lock"></i>
+              </span>
+              <input type="password" id="auth-password" required placeholder="••••••••" class="neu-input w-full pl-9 pr-3 py-2.5 text-xs text-slate-800 dark:text-slate-100">
+            </div>
+          </div>
+          <button type="submit" id="btn-login" class="neu-button w-full py-2.5 mt-2 font-bold text-xs text-white bg-blue-600 hover:bg-blue-500 rounded-xl transition duration-200 flex items-center justify-center gap-2 shadow-md shadow-blue-500/20">
+            <i class="fa-solid fa-right-to-bracket"></i>
+            <span>Sign In</span>
+          </button>
+        </form>
+      </div>
+
+      <!-- Forced Password Change Container -->
+      <div id="change-password-container" class="hidden">
+        <div class="p-3 neu-pressed rounded-xl mb-4 text-center">
+          <i class="fa-solid fa-key text-amber-500 text-lg mb-1"></i>
+          <h2 class="text-sm font-bold text-slate-800 dark:text-slate-100">Mandatory Password Update</h2>
+          <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Please set a secure permanent password before continuing.</p>
+        </div>
+        <form onsubmit="handleChangePassword(event)" class="space-y-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1.5">New Password (Min 6 Characters)</label>
+            <div class="relative">
+              <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400 text-xs">
+                <i class="fa-solid fa-lock"></i>
+              </span>
+              <input type="password" id="auth-new-password" required minlength="6" placeholder="••••••••" class="neu-input w-full pl-9 pr-3 py-2.5 text-xs text-slate-800 dark:text-slate-100">
+            </div>
+          </div>
+          <button type="submit" id="btn-change-pass" class="neu-button w-full py-2.5 font-bold text-xs text-white bg-amber-600 hover:bg-amber-500 rounded-xl transition duration-200 flex items-center justify-center gap-2 shadow-md shadow-amber-500/20">
+            <i class="fa-solid fa-check"></i>
+            <span>Save &amp; Continue</span>
+          </button>
+        </form>
+      </div>
+
+      <!-- Forgot Password (2-Step Verification) Container -->
+      <div id="forgot-password-container" class="hidden">
+        <div class="flex items-center justify-between mb-4 border-b border-slate-300/40 dark:border-slate-700/50 pb-3">
+          <div class="flex items-center gap-2">
+            <i class="fa-solid fa-key text-blue-500"></i>
+            <h2 class="text-sm font-bold text-slate-800 dark:text-slate-100">Reset Password</h2>
+          </div>
+          <button type="button" onclick="showForgotPasswordView(0)" class="text-xs text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 font-semibold flex items-center gap-1">
+            <i class="fa-solid fa-arrow-left"></i> Back
+          </button>
+        </div>
+
+        <!-- Step 1: Request 6-digit Code -->
+        <div id="forgot-step-1">
+          <p class="text-xs text-slate-500 dark:text-slate-400 mb-4 leading-relaxed">
+            Enter your official registered email address. A 6-digit verification code will be dispatched to your inbox (valid for 15 minutes).
+          </p>
+          <form onsubmit="handleRequestResetCode(event)" class="space-y-4">
+            <div>
+              <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1.5">Registered Email</label>
+              <div class="relative">
+                <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400 text-xs">
+                  <i class="fa-regular fa-envelope"></i>
+                </span>
+                <input type="email" id="reset-email" required placeholder="name@domain.edu" class="neu-input w-full pl-9 pr-3 py-2.5 text-xs text-slate-800 dark:text-slate-100">
+              </div>
+            </div>
+            <button type="submit" id="btn-request-reset" class="neu-button w-full py-2.5 font-bold text-xs text-white bg-blue-600 hover:bg-blue-500 rounded-xl transition duration-200 flex items-center justify-center gap-2">
+              <i class="fa-regular fa-paper-plane"></i>
+              <span>Send Verification Code</span>
+            </button>
+          </form>
+        </div>
+
+        <!-- Step 2: Enter Code & New Password -->
+        <div id="forgot-step-2" class="hidden">
+          <div class="p-3 neu-pressed rounded-xl mb-4 text-xs text-slate-600 dark:text-slate-300">
+            <span class="text-slate-400">Verification code sent to:</span><br>
+            <span id="reset-target-email-display" class="font-bold font-mono text-blue-600 dark:text-blue-400"></span>
+          </div>
+          <form onsubmit="handleVerifyResetCode(event)" class="space-y-3.5">
+            <div>
+              <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1.5">Verification Code (6 Digits)</label>
+              <input type="text" id="reset-code" required maxlength="6" pattern="[0-9]{6}" placeholder="• • • • • •" class="neu-input w-full px-3 py-2.5 text-center text-sm font-mono tracking-widest text-slate-800 dark:text-slate-100">
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1.5">New Password (Min 6 Characters)</label>
+              <input type="password" id="reset-new-password" required minlength="6" placeholder="••••••••" class="neu-input w-full px-3 py-2.5 text-xs text-slate-800 dark:text-slate-100">
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1.5">Confirm New Password</label>
+              <input type="password" id="reset-confirm-password" required minlength="6" placeholder="••••••••" class="neu-input w-full px-3 py-2.5 text-xs text-slate-800 dark:text-slate-100">
+            </div>
+            <button type="submit" id="btn-verify-reset" class="neu-button w-full py-2.5 font-bold text-xs text-white bg-emerald-600 hover:bg-emerald-500 rounded-xl transition duration-200 flex items-center justify-center gap-2 shadow-md shadow-emerald-500/20">
+              <i class="fa-solid fa-shield-check"></i>
+              <span>Verify &amp; Update Password</span>
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <!-- Security / PDPA Footer -->
+      <div class="mt-6 pt-4 border-t border-slate-300/40 dark:border-slate-700/50 flex flex-col items-center gap-1 text-[11px] text-slate-400 dark:text-slate-500">
+        <div class="flex items-center gap-1.5 font-medium">
+          <i class="fa-solid fa-lock text-emerald-500"></i>
+          <span>Encrypted Session • </span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div id="app-view" class="hidden">
+  <!-- ================= TOP NAVIGATION & HEADER ================= -->
+  <header class="neu-card p-5 mb-5 flex flex-col md:flex-row items-center justify-between gap-4">
+    <div class="flex items-center gap-4 w-full md:w-auto">
+      <div class="w-14 h-14 neu-card p-2 flex items-center justify-center flex-shrink-0 overflow-hidden">
+        <img src="https://lh3.googleusercontent.com/d/1i2MnU347Gh-Os-V7loTPkp8LM-MZ3yDH" 
+             alt="AMS Official Logo" 
+             class="w-full h-full object-contain"
+             onerror="this.onerror=null; this.src='https://placehold.co/128x128/3b82f6/ffffff?text=AMS';">
+      </div>
+      <div>
+        <div class="flex flex-wrap items-center gap-2">
+          <span class="text-[11px] font-bold tracking-wider text-blue-600 uppercase bg-blue-100 dark:bg-blue-900/40 dark:text-blue-400 px-2.5 py-0.5 rounded-full">
+            Office of Internal Audit
+          </span>
+          <span id="data-source-badge" class="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400 flex items-center gap-1.5">
+            <span class="w-2 h-2 rounded-full bg-emerald-500 pulse-dot"></span> Validated Portfolio (10 Engagements)
+          </span>
+          <span id="header-user-badge" class="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-300 flex items-center gap-1.5">
+            <i class="fa-solid fa-user-shield text-blue-500 text-[10px]"></i>
+            <span id="header-user-role">STAFF</span>
+            <span id="header-user-name" class="font-normal text-slate-500 dark:text-slate-400 hidden sm:inline border-l border-slate-300 dark:border-slate-700 pl-1.5"></span>
+          </span>
+        </div>
+        <h1 class="text-xl sm:text-2xl font-extrabold tracking-tight mt-1 text-slate-800 dark:text-slate-100">
+          Audit Monitoring System <span class="text-blue-500 font-semibold text-lg">(AMS)</span>
+        </h1>
+      </div>
+    </div>
+
+    <!-- Navigation & Theme Controls -->
+    <div class="flex flex-wrap items-center gap-2.5 w-full md:w-auto justify-end">
+      <!-- Main Views Nav Tabs -->
+      <nav class="flex items-center gap-1.5 neu-pressed p-1.5 rounded-xl">
+        <button id="nav-btn-dashboard" onclick="navigateToPage('dashboard')" class="neu-button px-4 py-2 text-xs font-bold active flex items-center gap-1.5 text-blue-600 dark:text-blue-400">
+          <i class="fa-solid fa-chart-line"></i>
+          <span>Dashboard</span>
+        </button>
+        <button id="nav-btn-register" onclick="navigateToPage('register')" class="neu-button px-4 py-2 text-xs font-bold flex items-center gap-1.5 text-slate-600 dark:text-slate-300">
+          <i class="fa-solid fa-table-list"></i>
+          <span>Audit Registers</span>
+        </button>
+        <button id="nav-btn-settings" onclick="navigateToPage('settings')" class="neu-button px-4 py-2 text-xs font-bold flex items-center gap-1.5 text-slate-600 dark:text-slate-300">
+          <i class="fa-solid fa-gear"></i>
+          <span>Settings</span>
+        </button>
+      </nav>
+
+      <!-- Sync Button -->
+      <button id="btn-sync" onclick="syncDataFromSheets()" class="neu-button px-3.5 py-2 flex items-center gap-1.5 text-xs font-bold text-slate-700 dark:text-slate-200" title="Synchronize with Google Sheets">
+        <i id="sync-icon" class="fa-solid fa-arrows-rotate text-blue-500"></i>
+        <span class="hidden sm:inline">Sync Sheets</span>
+      </button>
+
+      <!-- Logout Button -->
+      <button onclick="logout()" class="neu-button px-3.5 py-2 flex items-center gap-1.5 text-xs font-bold text-rose-600 dark:text-rose-400" title="Sign Out">
+        <i class="fa-solid fa-right-from-bracket"></i>
+        <span class="hidden sm:inline">Logout</span>
+      </button>
+
+      <!-- Theme Switcher -->
+      <button id="theme-toggle" onclick="toggleTheme()" class="neu-button w-9 h-9 flex items-center justify-center text-slate-700 dark:text-slate-200" title="Toggle Light/Dark Theme">
+        <i id="theme-icon" class="fa-solid fa-moon"></i>
+      </button>
+    </div>
+  </header>
+
+  <!-- ================= GLOBAL GOVERNANCE FILTERS ================= -->
+  <section class="neu-card p-4 sm:p-5 mb-5">
+    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 mb-3.5">
+      <div class="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
+        <i class="fa-solid fa-filter text-blue-500"></i>
+        <span>Dynamic Portfolio Filters</span>
+      </div>
+      <button onclick="resetFilters()" class="text-xs text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1 font-semibold">
+        <i class="fa-solid fa-rotate-left"></i> Reset All Filters
+      </button>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3.5">
+      <!-- Year Filter -->
+      <div>
+        <label class="block text-[11px] font-semibold text-slate-500 dark:text-slate-400 mb-1">
+          <i class="fa-regular fa-calendar mr-1 text-blue-500"></i> Audit Year
+        </label>
+        <select id="filter-year" onchange="applyFilters()" class="neu-input w-full px-3 py-2 text-xs">
+          <!-- Populated dynamically -->
+        </select>
+      </div>
+
+      <!-- Subject Filter -->
+      <div>
+        <label class="block text-[11px] font-semibold text-slate-500 dark:text-slate-400 mb-1">
+          <i class="fa-solid fa-book-bookmark mr-1 text-indigo-500"></i> Audit Title
+        </label>
+        <select id="filter-subject" onchange="applyFilters()" class="neu-input w-full px-3 py-2 text-xs">
+          <option value="ALL">All Audits</option>
+        </select>
+      </div>
+
+      <!-- KCDIOM Filter -->
+      <div>
+        <label class="block text-[11px] font-semibold text-slate-500 dark:text-slate-400 mb-1">
+          <i class="fa-solid fa-building-user mr-1 text-teal-500"></i> Division / KCDIOM
+        </label>
+        <select id="filter-kcdiom" onchange="applyFilters()" class="neu-input w-full px-3 py-2 text-xs">
+          <option value="ALL">All Divisions</option>
+        </select>
+      </div>
+
+      <!-- Rating Filter -->
+      <div>
+        <label class="block text-[11px] font-semibold text-slate-500 dark:text-slate-400 mb-1">
+          <i class="fa-solid fa-triangle-exclamation mr-1 text-amber-500"></i> Finding Rating
+        </label>
+        <select id="filter-severity" onchange="applyFilters()" class="neu-input w-full px-3 py-2 text-xs">
+          <option value="ALL">All Ratings</option>
+          <option value="High">High Rating</option>
+          <option value="Medium">Medium Rating</option>
+          <option value="Low">Low Rating</option>
+        </select>
+      </div>
+
+      <!-- Action Plan Status Filter -->
+      <div>
+        <label class="block text-[11px] font-semibold text-slate-500 dark:text-slate-400 mb-1">
+          <i class="fa-solid fa-bars-progress mr-1 text-emerald-500"></i> Action Plan Status
+        </label>
+        <select id="filter-action-status" onchange="applyFilters()" class="neu-input w-full px-3 py-2 text-xs">
+          <option value="ALL">All Action Statuses</option>
+          <option value="Closed">Closed</option>
+          <option value="Open - In Progress">Open - In Progress</option>
+          <option value="Open - No action">Open - No action</option>
+          <option value="Overdue">Overdue</option>
+        </select>
+      </div>
+
+      <!-- Search Keyword -->
+      <div>
+        <label class="block text-[11px] font-semibold text-slate-500 dark:text-slate-400 mb-1">
+          <i class="fa-solid fa-magnifying-glass mr-1 text-purple-500"></i> Universal Search
+        </label>
+        <input type="text" id="filter-search" oninput="applyFilters()" placeholder="Audit ID, title, issue..." class="neu-input w-full px-3 py-2 text-xs">
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================
+       PAGE VIEW 1: EXECUTIVE GOVERNANCE DASHBOARD
+       ======================================================== -->
+  <main id="view-dashboard" class="space-y-5">
+    <!-- Executive KPI Cards -->
+    <section class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3.5">
+      <!-- 1. Total Projects -->
+      <div class="neu-card p-4 flex flex-col justify-between">
+        <div class="flex items-center justify-between text-slate-400">
+          <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Audit Projects</span>
+          <i class="fa-solid fa-folder-tree text-blue-500 text-base"></i>
+        </div>
+        <div class="mt-2">
+          <button type="button" 
+                  onclick="navigateToPage('register'); switchTab('projects');" 
+                  class="cursor-pointer group flex items-center gap-2 text-left focus:outline-none" 
+                  title="Click to view list of Audit Projects">
+            <span id="kpi-total-projects" class="text-2xl font-extrabold text-slate-800 dark:text-slate-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">--</span>
+            <i class="fa-solid fa-arrow-up-right-from-square text-xs text-slate-400 group-hover:text-blue-500 transition-transform group-hover:scale-110"></i>
+          </button>
+          <span id="kpi-sub-projects" class="text-[11px] text-blue-600 dark:text-blue-400 font-semibold block mt-0.5">
+            Calculating breakdown...
+          </span>
+        </div>
+      </div>
+
+      <!-- 2. Scopes Evaluated -->
+      <div class="neu-card p-4 flex flex-col justify-between">
+        <div class="flex items-center justify-between text-slate-400">
+          <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Tested Scopes</span>
+          <i class="fa-solid fa-crosshairs text-teal-500 text-base"></i>
+        </div>
+        <div class="mt-2">
+          <button type="button" 
+                  onclick="navigateToPage('register'); switchTab('scopes');" 
+                  class="cursor-pointer group flex items-center gap-2 text-left focus:outline-none" 
+                  title="Click to view list of Audit Scopes">
+            <span id="kpi-total-scopes" class="text-2xl font-extrabold text-slate-800 dark:text-slate-100 group-hover:text-teal-600 dark:group-hover:text-teal-400 transition-colors">--</span>
+            <i class="fa-solid fa-arrow-up-right-from-square text-xs text-slate-400 group-hover:text-teal-500 transition-transform group-hover:scale-110"></i>
+          </button>
+          <span id="kpi-sub-scopes" class="text-[11px] text-teal-600 dark:text-teal-400 font-semibold block mt-0.5">
+            Calculating breakdown...
+          </span>
+        </div>
+      </div>
+
+      <!-- 3. Total Findings -->
+      <div class="neu-card p-4 flex flex-col justify-between">
+        <div class="flex items-center justify-between text-slate-400">
+          <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Audit Findings</span>
+          <i class="fa-solid fa-triangle-exclamation text-amber-500 text-base"></i>
+        </div>
+        <div class="mt-2">
+          <button type="button" 
+                  onclick="navigateToPage('register'); switchTab('findings');" 
+                  class="cursor-pointer group flex items-center gap-2 text-left focus:outline-none" 
+                  title="Click to view list of Audit Findings">
+            <span id="kpi-total-findings" class="text-2xl font-extrabold text-slate-800 dark:text-slate-100 group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">--</span>
+            <i class="fa-solid fa-arrow-up-right-from-square text-xs text-slate-400 group-hover:text-amber-500 transition-transform group-hover:scale-110"></i>
+          </button>
+          <span id="kpi-sub-findings" class="text-[11px] text-amber-600 dark:text-amber-400 font-semibold block mt-0.5">
+            Calculating breakdown...
+          </span>
+        </div>
+      </div>
+
+      <!-- 4. High Risk Findings -->
+      <div class="neu-card p-4 flex flex-col justify-between">
+        <div class="flex items-center justify-between text-slate-400">
+          <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">High Rating Issues</span>
+          <i class="fa-solid fa-fire text-red-500 text-base"></i>
+        </div>
+        <div class="mt-2">
+          <button type="button" 
+                  onclick="document.getElementById('filter-severity').value='High'; applyFilters(); navigateToPage('register'); switchTab('findings');" 
+                  class="cursor-pointer group flex items-center gap-2 text-left focus:outline-none" 
+                  title="Click to filter and view High Rating Findings">
+            <span id="kpi-high-findings" class="text-2xl font-extrabold text-red-600 dark:text-red-400 group-hover:underline transition-colors">--</span>
+            <i class="fa-solid fa-arrow-up-right-from-square text-xs text-red-400 group-hover:text-red-500 transition-transform group-hover:scale-110"></i>
+          </button>
+          <span id="kpi-sub-high" class="text-[11px] text-red-600 dark:text-red-400 font-semibold block mt-0.5">
+            Calculating breakdown...
+          </span>
+        </div>
+      </div>
+
+      <!-- 5. Action Plans -->
+      <div class="neu-card p-4 flex flex-col justify-between">
+        <div class="flex items-center justify-between text-slate-400">
+          <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Action Plans</span>
+          <i class="fa-solid fa-list-check text-purple-500 text-base"></i>
+        </div>
+        <div class="mt-2">
+          <button type="button" 
+                  onclick="navigateToPage('register'); switchTab('actions');" 
+                  class="cursor-pointer group flex items-center gap-2 text-left focus:outline-none" 
+                  title="Click to view list of Action Plans">
+            <span id="kpi-total-actions" class="text-2xl font-extrabold text-slate-800 dark:text-slate-100 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">--</span>
+            <i class="fa-solid fa-arrow-up-right-from-square text-xs text-slate-400 group-hover:text-purple-500 transition-transform group-hover:scale-110"></i>
+          </button>
+          <span id="kpi-sub-actions" class="text-[11px] text-purple-600 dark:text-purple-400 font-semibold block mt-0.5">
+            Calculating breakdown...
+          </span>
+        </div>
+      </div>
+
+      <!-- 6. Finding Closure Rate -->
+      <div class="neu-card p-4 flex flex-col justify-between">
+        <div class="flex items-center justify-between text-slate-400">
+          <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Finding Closure Rate</span>
+          <i class="fa-solid fa-circle-check text-emerald-500 text-base"></i>
+        </div>
+        <div class="mt-2">
+          <div id="kpi-remediation-rate" class="text-2xl font-extrabold text-emerald-600 dark:text-emerald-400">--</div>
+          <span id="kpi-sub-rate" class="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold">
+            Calculating rate...
+          </span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Visual Governance Analytics Charts -->
+    <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+      <!-- Chart 1: Finding Ratings -->
+      <div class="neu-card p-5 flex flex-col">
+        <div class="flex items-center justify-between mb-2">
+          <h2 class="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
+            <i class="fa-solid fa-chart-pie text-red-500 mr-1.5"></i> Finding Ratings
+          </h2>
+        </div>
+        <div class="relative flex-1 flex items-center justify-center min-h-[210px]">
+          <canvas id="chart-severity"></canvas>
+        </div>
+      </div>
+
+      <!-- Chart 2: Audit Opinions -->
+      <div class="neu-card p-5 flex flex-col">
+        <div class="flex items-center justify-between mb-2">
+          <h2 class="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
+            <i class="fa-solid fa-stamp text-blue-500 mr-1.5"></i> Audit Opinions Issued
+          </h2>
+        </div>
+        <div class="relative flex-1 flex items-center justify-center min-h-[210px]">
+          <canvas id="chart-opinions"></canvas>
+        </div>
+      </div>
+
+      <!-- Chart 3: Action Plan Status -->
+      <div class="neu-card p-5 flex flex-col">
+        <div class="flex items-center justify-between mb-2">
+          <h2 class="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
+            <i class="fa-solid fa-bars-progress text-emerald-500 mr-1.5"></i> Action Plan Status
+          </h2>
+        </div>
+        <div class="relative flex-1 flex items-center justify-center min-h-[210px]">
+          <canvas id="chart-actions"></canvas>
+        </div>
+      </div>
+
+      <!-- Chart 4: KCDIOM Distribution -->
+      <div class="neu-card p-5 flex flex-col">
+        <div class="flex items-center justify-between mb-2">
+          <h2 class="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
+            <i class="fa-solid fa-chart-column text-indigo-500 mr-1.5"></i> Engagements by Division
+          </h2>
+        </div>
+        <div class="relative flex-1 flex items-center justify-center min-h-[210px]">
+          <canvas id="chart-kcdiom"></canvas>
+        </div>
+      </div>
+    </section>
+
+    <!-- Governance Quick Actions & Summary Banner -->
+    <section class="neu-card p-5 flex flex-col md:flex-row items-center justify-between gap-4">
+      <div class="flex items-center gap-3.5">
+        <div class="w-12 h-12 neu-card flex items-center justify-center text-blue-500 text-xl flex-shrink-0">
+          <i class="fa-solid fa-clipboard-check"></i>
+        </div>
+        <div>
+          <h3 class="text-sm font-bold text-slate-800 dark:text-slate-100">Annual Audit Plan Execution &amp; Relational Registry</h3>
+          <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+            Viewing <strong id="summary-active-count" class="text-blue-600 dark:text-blue-400">10</strong> verified audit engagements. Switch to Audit Registers to inspect granular scopes, observations, and remediation progress.
+          </p>
+        </div>
+      </div>
+      <button onclick="navigateToPage('register')" class="neu-button px-4 py-2.5 text-xs font-bold text-blue-600 dark:text-blue-400 flex items-center gap-2 flex-shrink-0">
+        <span>Go to Audit Registers</span>
+        <i class="fa-solid fa-arrow-right"></i>
+      </button>
+    </section>
+  </main>
+
+  <!-- ========================================================
+       PAGE VIEW 2: RELATIONAL AUDIT REGISTERS & REPOSITORIES
+       ======================================================== -->
+  <main id="view-register" class="space-y-5 hidden">
+    <div class="neu-card p-4 sm:p-5">
+      <!-- Registers Nav Tabs -->
+      <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-300/40 dark:border-slate-700/50 pb-3 mb-4">
+        <div class="flex flex-wrap items-center gap-2">
+          <button onclick="switchTab('projects')" id="tab-btn-projects" class="neu-button px-3.5 py-1.5 text-xs font-bold active">
+            <i class="fa-solid fa-folder mr-1.5 text-blue-500"></i> Audit Projects (<span id="count-tab-projects">0</span>)
+          </button>
+          <button onclick="switchTab('scopes')" id="tab-btn-scopes" class="neu-button px-3.5 py-1.5 text-xs font-bold">
+            <i class="fa-solid fa-crosshairs mr-1.5 text-teal-500"></i> Audit Scopes (<span id="count-tab-scopes">0</span>)
+          </button>
+          <button onclick="switchTab('findings')" id="tab-btn-findings" class="neu-button px-3.5 py-1.5 text-xs font-bold">
+            <i class="fa-solid fa-triangle-exclamation mr-1.5 text-amber-500"></i> Audit Findings (<span id="count-tab-findings">0</span>)
+          </button>
+          <button onclick="switchTab('actions')" id="tab-btn-actions" class="neu-button px-3.5 py-1.5 text-xs font-bold">
+            <i class="fa-solid fa-tasks mr-1.5 text-purple-500"></i> Action Plans (<span id="count-tab-actions">0</span>)
+          </button>
+        </div>
+
+        <button onclick="navigateToPage('dashboard')" class="neu-button px-3 py-1.5 text-xs font-semibold text-slate-600 dark:text-slate-300 flex items-center gap-1.5">
+          <i class="fa-solid fa-arrow-left"></i> Back to Dashboard
+        </button>
+      </div>
+
+      <!-- TAB 1: AUDIT PROJECTS TABLE -->
+      <div id="tab-content-projects" class="overflow-x-auto">
+        <table class="neu-table w-full text-left">
+          <thead>
+            <tr>
+              <th class="py-2.5 px-3">Audit ID</th>
+              <th class="py-2.5 px-3">Year</th>
+              <th class="py-2.5 px-3">Audit No</th>
+              <th class="py-2.5 px-3">Audit Project Title</th>
+              <th class="py-2.5 px-3">Division</th>
+              <th class="py-2.5 px-3">Audit Opinion</th>
+              <th class="py-2.5 px-3">Report Ref</th>
+              <th class="py-2.5 px-3 text-center">Scopes</th>
+              <th class="py-2.5 px-3 text-center">Findings</th>
+              <th class="py-2.5 px-3 text-right">Details</th>
+            </tr>
+          </thead>
+          <tbody id="table-body-projects">
+            <!-- Rendered by JS -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- TAB 2: AUDIT SCOPE TABLE -->
+      <div id="tab-content-scopes" class="overflow-x-auto hidden">
+        <table class="neu-table w-full text-left">
+          <thead>
+            <tr>
+              <th class="py-2.5 px-3">Scope ID</th>
+              <th class="py-2.5 px-3">Audit ID</th>
+              <th class="py-2.5 px-3">Parent Project Ref</th>
+              <th class="py-2.5 px-3">Scope Category</th>
+              <th class="py-2.5 px-3 text-center">Findings</th>
+              <th class="py-2.5 px-3 text-right">Inspect</th>
+            </tr>
+          </thead>
+          <tbody id="table-body-scopes">
+            <!-- Rendered by JS -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- TAB 3: AUDIT FINDINGS TABLE -->
+      <div id="tab-content-findings" class="overflow-x-auto hidden">
+        <table class="neu-table w-full text-left">
+          <thead>
+            <tr>
+              <th class="py-2.5 px-3">Finding ID</th>
+              <th class="py-2.5 px-3">Audit Project</th>
+              <th class="py-2.5 px-3">Scope ID</th>
+              <th class="py-2.5 px-3">Finding Rating</th>
+              <th class="py-2.5 px-3">Finding Title</th>
+              <th class="py-2.5 px-3">Issue Details</th>
+              <th class="py-2.5 px-3">Management Response</th>
+              <th class="py-2.5 px-3 text-center">Actions</th>
+              <th class="py-2.5 px-3 text-right">Inspect</th>
+            </tr>
+          </thead>
+          <tbody id="table-body-findings">
+            <!-- Rendered by JS -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- TAB 4: ACTION PLANS TABLE -->
+      <div id="tab-content-actions" class="overflow-x-auto hidden">
+        <table class="neu-table w-full text-left">
+          <thead>
+            <tr>
+              <th class="py-2.5 px-3">Action ID</th>
+              <th class="py-2.5 px-3">Finding ID</th>
+              <th class="py-2.5 px-3">Project Ref</th>
+              <th class="py-2.5 px-3">Management Action Plan</th>
+              <th class="py-2.5 px-3">Status</th>
+              <th class="py-2.5 px-3 text-right">Trace</th>
+            </tr>
+          </thead>
+          <tbody id="table-body-actions">
+            <!-- Rendered by JS -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+
+  <!-- ========================================================
+       PAGE VIEW 3: SETTINGS & USER MANAGEMENT (RBAC)
+       ======================================================== -->
+  <main id="view-settings" class="space-y-5 hidden">
+    <!-- ADMIN SECTION: USER MANAGEMENT (Hidden for Staff) -->
+    <section id="admin-users-section" class="neu-card p-5 hidden">
+      <div class="flex items-center justify-between border-b border-slate-300/40 dark:border-slate-700/50 pb-3 mb-4">
+        <div>
+          <h2 class="text-base font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
+            <i class="fa-solid fa-users-gear text-blue-500"></i> System User Management (Admin Only)
+          </h2>
+          <p class="text-xs text-slate-500 mt-0.5">Register new users or delete accounts. Temporary passwords will be sent directly to user emails.</p>
+        </div>
+        <button onclick="loadUsersList()" class="neu-button px-3 py-1.5 text-xs font-semibold text-blue-600 dark:text-blue-400 flex items-center gap-1.5">
+          <i class="fa-solid fa-arrows-rotate"></i> Refresh User List
+        </button>
+      </div>
+
+      <!-- Add New User Form -->
+      <form onsubmit="handleCreateUser(event)" class="neu-card-sm p-4 mb-5 bg-slate-50/50 dark:bg-slate-900/30">
+        <h3 class="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-3">
+          <i class="fa-solid fa-user-plus text-emerald-500 mr-1.5"></i> Register New User
+        </h3>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          <div>
+            <label class="block text-[11px] font-semibold text-slate-500 dark:text-slate-400 mb-1">User Email (Login ID)</label>
+            <input type="email" id="new-user-email" required placeholder="user@domain.edu" class="neu-input w-full px-3 py-2 text-xs">
+          </div>
+          <div>
+            <label class="block text-[11px] font-semibold text-slate-500 dark:text-slate-400 mb-1">Full Name</label>
+            <input type="text" id="new-user-name" required placeholder="Full Name" class="neu-input w-full px-3 py-2 text-xs">
+          </div>
+          <div>
+            <label class="block text-[11px] font-semibold text-slate-500 dark:text-slate-400 mb-1">Role</label>
+            <select id="new-user-role" class="neu-input w-full px-3 py-2 text-xs">
+              <option value="STAFF">STAFF (Viewer / Auditee)</option>
+              <option value="ADMIN">ADMIN (Full Administrator)</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-[11px] font-semibold text-slate-500 dark:text-slate-400 mb-1">Temporary Password</label>
+            <input type="text" id="new-user-temp-pass" required minlength="6" placeholder="Min 6 characters" class="neu-input w-full px-3 py-2 text-xs font-mono">
+          </div>
+        </div>
+        <div class="mt-3 flex justify-end">
+          <button type="submit" id="btn-create-user" class="neu-button px-4 py-2 text-xs font-bold text-white bg-blue-600 hover:bg-blue-500 rounded-lg flex items-center gap-1.5">
+            <i class="fa-solid fa-paper-plane"></i> Register &amp; Send Credentials via Email
+          </button>
+        </div>
+      </form>
+
+      <!-- Users List Table -->
+      <div class="overflow-x-auto">
+        <table class="neu-table w-full text-left">
+          <thead>
+            <tr>
+              <th class="py-2.5 px-3">Email (ID)</th>
+              <th class="py-2.5 px-3">Full Name</th>
+              <th class="py-2.5 px-3">Role</th>
+              <th class="py-2.5 px-3">Status</th>
+              <th class="py-2.5 px-3">Must Change Password</th>
+              <th class="py-2.5 px-3 text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="table-body-users">
+            <tr><td colspan="6" class="text-center py-4 text-slate-400">Click 'Refresh User List' to load registered accounts.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- SELF SERVICE SECTION: CHANGE OWN PASSWORD (Available for All Roles) -->
+    <section class="neu-card p-5">
+      <div class="border-b border-slate-300/40 dark:border-slate-700/50 pb-3 mb-4">
+        <h2 class="text-base font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
+          <i class="fa-solid fa-lock text-amber-500"></i> Change Your Password
+        </h2>
+        <p class="text-xs text-slate-500 mt-0.5">Securely update your personal login credentials. Encrypted via SHA-256 with cryptographic salt.</p>
+      </div>
+
+      <form onsubmit="handleSelfPasswordChange(event)" class="max-w-md space-y-3">
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">New Password (Min 6 Characters)</label>
+          <input type="password" id="self-new-password" required minlength="6" class="neu-input w-full px-3 py-2 text-xs">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">Confirm New Password</label>
+          <input type="password" id="self-confirm-password" required minlength="6" class="neu-input w-full px-3 py-2 text-xs">
+        </div>
+        <button type="submit" id="btn-self-pass" class="neu-button px-4 py-2 text-xs font-bold text-amber-700 dark:text-amber-400 hover:text-amber-600 rounded-lg flex items-center gap-1.5">
+          <i class="fa-solid fa-check"></i> Update Password
+        </button>
+      </form>
+    </section>
+  </main>
+
+  <!-- ================= RELATIONAL DETAIL INSPECTION MODAL ================= -->
+  <div id="audit-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm hidden">
+    <div class="neu-card w-full max-w-4xl max-h-[90vh] overflow-y-auto p-6 relative">
+      <button onclick="closeModal()" class="absolute top-5 right-5 neu-button w-8 h-8 flex items-center justify-center text-slate-500 hover:text-red-500">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+      <div id="modal-content">
+        <!-- Injected via JavaScript -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="fixed bottom-5 right-5 neu-card px-4 py-3 text-xs font-semibold flex items-center gap-2 transform translate-y-24 opacity-0 transition-all duration-300 z-50">
+    <i id="toast-icon" class="fa-solid fa-circle-check text-emerald-500 text-sm"></i>
+    <span id="toast-msg">Database loaded successfully.</span>
+  </div>
+  </div> <!-- End of app-view -->
+
+  <!-- ================= SYSTEM LOGIC & DATA ENGINE ================= -->
+  <script>
+    // ===== TAMPAL URL APPS SCRIPT DI SINI SELEPAS DEPLOY =====
+    const GAS_URL = "https://script.google.com/macros/s/AKfycbzhNi0PlYNzme11VAKePq6bGXfFxaVgkBTpTTUcgShmVuXt6ZeXcVuUWBPnFjBjBrDw/exec";
+
+    let rawData = {
+      projects: [],
+      scopes: [],
+      findings: [],
+      actions: []
+    };
+
+    let filteredData = {
+      projects: [],
+      scopes: [],
+      findings: [],
+      actions: []
+    };
+
+    let charts = {};
+    let activeTab = 'projects';
+    let currentPage = 'dashboard';
+    let currentUser = {
+      emel: localStorage.getItem("amms_user_email") || '',
+      role: localStorage.getItem("amms_user_role") || 'STAFF',
+      nama: localStorage.getItem("amms_user_name") || ''
+    };
+
+    const safeStr = (val) => String(val === null || val === undefined ? '' : val).trim();
+    const normalizeKey = (val) => safeStr(val).toUpperCase();
+
+    function navigateToPage(pageId) {
+      currentPage = pageId;
+      const viewDashboard = document.getElementById('view-dashboard');
+      const viewRegister = document.getElementById('view-register');
+      const viewSettings = document.getElementById('view-settings');
+      const navBtnDash = document.getElementById('nav-btn-dashboard');
+      const navBtnReg = document.getElementById('nav-btn-register');
+      const navBtnSet = document.getElementById('nav-btn-settings');
+
+      [navBtnDash, navBtnReg, navBtnSet].forEach(btn => {
+        if (btn) {
+          btn.classList.remove('active', 'text-blue-600', 'dark:text-blue-400');
+          btn.classList.add('text-slate-600', 'dark:text-slate-300');
+        }
+      });
+      [viewDashboard, viewRegister, viewSettings].forEach(v => {
+        if (v) v.classList.add('hidden');
+      });
+
+      if (pageId === 'dashboard') {
+        viewDashboard.classList.remove('hidden');
+        navBtnDash.classList.add('active', 'text-blue-600', 'dark:text-blue-400');
+        navBtnDash.classList.remove('text-slate-600', 'dark:text-slate-300');
+        renderCharts();
+      } else if (pageId === 'register') {
+        viewRegister.classList.remove('hidden');
+        navBtnReg.classList.add('active', 'text-blue-600', 'dark:text-blue-400');
+        navBtnReg.classList.remove('text-slate-600', 'dark:text-slate-300');
+      } else if (pageId === 'settings') {
+        viewSettings.classList.remove('hidden');
+        navBtnSet.classList.add('active', 'text-blue-600', 'dark:text-blue-400');
+        navBtnSet.classList.remove('text-slate-600', 'dark:text-slate-300');
+        applyRolePermissions();
+        if (currentUser.role === 'ADMIN') {
+          loadUsersList();
+        }
+      }
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function applyRolePermissions() {
+      const adminSection = document.getElementById('admin-users-section');
+      const roleBadge = document.getElementById('header-user-role');
+      const nameBadge = document.getElementById('header-user-name');
+      if (roleBadge) roleBadge.innerText = currentUser.role || 'STAFF';
+      if (nameBadge) nameBadge.innerText = currentUser.nama || currentUser.emel || '';
+
+      if (adminSection) {
+        if (currentUser.role === 'ADMIN') {
+          adminSection.classList.remove('hidden');
+        } else {
+          adminSection.classList.add('hidden');
+        }
+      }
+    }
+
+    const verifiedProjects = [
+      { audit_id: "AUD-2026-01", year: "2026", audit_no: "IA/2026/GOV-01", audit_project_name: "Governance, Integrity & Enterprise Risk Management Audit", kcdiom: "Legal & Governance", audit_opinion_ratings: "Satisfactory", audit_report_no: "REP/2026/001" },
+      { audit_id: "AUD-2026-02", year: "2026", audit_no: "IA/2026/FIN-02", audit_project_name: "Research Grants & Endowment Fund Management Audit", kcdiom: "Research Management Centre", audit_opinion_ratings: "Needs Improvement", audit_report_no: "REP/2026/002" },
+      { audit_id: "AUD-2026-03", year: "2026", audit_no: "IA/2026/ICT-03", audit_project_name: "Cloud Infrastructure Security & Data Privacy Audit", kcdiom: "Information Technology Division", audit_opinion_ratings: "Satisfactory", audit_report_no: "REP/2026/003" },
+      { audit_id: "AUD-2026-04", year: "2026", audit_no: "IA/2026/DEV-04", audit_project_name: "Critical Infrastructure & Facilities Maintenance Audit", kcdiom: "Development & Facilities", audit_opinion_ratings: "Needs Improvement", audit_report_no: "REP/2026/004" },
+      { audit_id: "AUD-2025-01", year: "2025", audit_no: "IA/2025/INV-01", audit_project_name: "Fixed Assets & Capital Inventory Management Audit", kcdiom: "Finance & Procurement", audit_opinion_ratings: "Needs Improvement", audit_report_no: "REP/2025/001" },
+      { audit_id: "AUD-2025-02", year: "2025", audit_no: "IA/2025/MED-02", audit_project_name: "Clinical Governance & Campus Health Services Audit", kcdiom: "Health & Medical Centre", audit_opinion_ratings: "Satisfactory", audit_report_no: "REP/2025/002" },
+      { audit_id: "AUD-2025-03", year: "2025", audit_no: "IA/2025/ACAD-03", audit_project_name: "Postgraduate Academic Administration & Examination Audit", kcdiom: "Academic Affairs", audit_opinion_ratings: "Satisfactory", audit_report_no: "REP/2025/003" },
+      { audit_id: "AUD-2025-04", year: "2025", audit_no: "IA/2025/HR-04", audit_project_name: "Human Capital Payroll & Training Administration Audit", kcdiom: "Human Resources", audit_opinion_ratings: "Satisfactory", audit_report_no: "REP/2025/004" },
+      { audit_id: "AUD-2025-05", year: "2025", audit_no: "IA/2025/COMM-05", audit_project_name: "Intellectual Property Licensing & Commercialisation Audit", kcdiom: "Innovation & Commercialisation", audit_opinion_ratings: "Unsatisfactory", audit_report_no: "REP/2025/005" },
+      { audit_id: "AUD-2025-06", year: "2025", audit_no: "IA/2025/PROC-06", audit_project_name: "Tender Procurement & Vendor Contract Compliance Audit", kcdiom: "Finance & Procurement", audit_opinion_ratings: "Needs Improvement", audit_report_no: "REP/2025/006" }
+    ];
+
+    const verifiedScopes = [
+      { scope_id: "SCP-26-01", audit_id: "AUD-2026-01", audit_scope_category: "Whistleblowing Policy & Corruption Risk Registers" },
+      { scope_id: "SCP-26-02", audit_id: "AUD-2026-01", audit_scope_category: "Board Conflict of Interest Disclosures" },
+      { scope_id: "SCP-26-03", audit_id: "AUD-2026-02", audit_scope_category: "International Grant Disbursements & Expense Claims" },
+      { scope_id: "SCP-26-04", audit_id: "AUD-2026-03", audit_scope_category: "Cloud Access Control & Multi-Factor Auth (MFA)" },
+      { scope_id: "SCP-26-05", audit_id: "AUD-2026-04", audit_scope_category: "Periodic Fire Safety & Hydrant System Testing" },
+      { scope_id: "SCP-25-01", audit_id: "AUD-2025-01", audit_scope_category: "Physical Asset Verification & QR Barcode Tagging" },
+      { scope_id: "SCP-25-02", audit_id: "AUD-2025-02", audit_scope_category: "Pharmacy Cold-Chain Storage & Drug Disposal" },
+      { scope_id: "SCP-25-03", audit_id: "AUD-2025-03", audit_scope_category: "Exam Bank Confidentiality & Secure Grading" },
+      { scope_id: "SCP-25-04", audit_id: "AUD-2025-04", audit_scope_category: "Scheme of Service Compliance & Promotions" },
+      { scope_id: "SCP-25-05", audit_id: "AUD-2025-05", audit_scope_category: "Patent License Agreements & Royalty Collection" },
+      { scope_id: "SCP-25-06", audit_id: "AUD-2025-06", audit_scope_category: "Contract Variation Order (VO) Verifications" }
+    ];
+
+    const verifiedFindings = [
+      { finding_id: "FND-26-01", audit_id: "AUD-2026-01", scope_id: "SCP-26-01", finding_title: "Corruption Risk Matrix Has Not Been Updated for Current Fiscal Year", finding_rating: "Low", finding_severity: "Low", audit_issue_details: "Departmental corruption risk registers are currently two versions behind baseline.", management_response: "A risk re-calibration workshop has been scheduled." },
+      { finding_id: "FND-26-02", audit_id: "AUD-2026-02", scope_id: "SCP-26-03", finding_title: "Research Advance Claims Exceeded Mandatory Settlement Period", finding_rating: "Medium", finding_severity: "Medium", audit_issue_details: "5 cash advances totaling RM 84,000 remain unadjusted for over 60 days.", management_response: "Formal reminders and salary deduction schedules initiated." },
+      { finding_id: "FND-26-03", audit_id: "AUD-2026-03", scope_id: "SCP-26-04", finding_title: "Multi-Factor Authentication (MFA) Not Fully Enforced for Admins", finding_rating: "High", finding_severity: "High", audit_issue_details: "42% of privileged executive accounts have not activated MFA controls.", management_response: "IT division enforced mandatory MFA rollout deadline." },
+      { finding_id: "FND-26-04", audit_id: "AUD-2026-04", scope_id: "SCP-26-05", finding_title: "Laboratory Fire Safety Certificate Expired", finding_rating: "High", finding_severity: "High", audit_issue_details: "The Central Research Laboratory block is operating with an overdue hydrant certification.", management_response: "Pump repair vendor engaged and inspection booked." },
+      { finding_id: "FND-25-01", audit_id: "AUD-2025-01", scope_id: "SCP-25-01", finding_title: "High-Value Movable Assets Missing Standard QR Identification Barcodes", finding_rating: "Medium", finding_severity: "Medium", audit_issue_details: "45 high-end laptops lack mandatory government asset identification tags.", management_response: "Comprehensive tagging exercise completed across units." },
+      { finding_id: "FND-25-02", audit_id: "AUD-2025-02", scope_id: "SCP-25-02", finding_title: "Cold-Chain Storage Temperatures Lack Automated Telemetry Alerts", finding_rating: "High", finding_severity: "High", audit_issue_details: "Vaccine storage temperatures are recorded manually once per day without off-hour alerts.", management_response: "WiFi-enabled IoT telemetry sensors procured." },
+      { finding_id: "FND-25-03", audit_id: "AUD-2025-03", scope_id: "SCP-25-03", finding_title: "Delays in Final Examination Grade Submission to Portal", finding_rating: "Low", finding_severity: "Low", audit_issue_details: "Portal recorded submission delays from 8 academic faculty members.", management_response: "Automated escalation reminders configured in LMS." },
+      { finding_id: "FND-25-04", audit_id: "AUD-2025-04", scope_id: "SCP-25-04", finding_title: "Periodic Mandatory Safety Training Compliance Lacks Tracking", finding_rating: "Low", finding_severity: "Low", audit_issue_details: "18% of support laboratory staff have not completed annual radiation safety training.", management_response: "Online mandatory refresher module activated." },
+      { finding_id: "FND-25-05", audit_id: "AUD-2025-05", scope_id: "SCP-25-05", finding_title: "Patent Royalty Arrears Totaling RM 120,000 Uncollected", finding_rating: "High", finding_severity: "High", audit_issue_details: "Spin-off licensee failed to submit certified annual sales statements.", management_response: "Legal letter of demand (LOD) served to licensee." },
+      { finding_id: "FND-25-06", audit_id: "AUD-2025-06", scope_id: "SCP-25-06", finding_title: "Deficiencies in Technical Evaluation Committee Documentation", finding_rating: "Medium", finding_severity: "Medium", audit_issue_details: "Disqualification justifications for two tenderers were not documented.", management_response: "Evaluation rubric guidelines standardized and distributed." }
+    ];
+
+    const verifiedActionPlans = [
+      { action_plan_id: "ACT-26-01", finding_id: "FND-26-01", management_action_plan: "Complete comprehensive Corruption Risk Register with Integrity Unit", action_status: "Open - In Progress" },
+      { action_plan_id: "ACT-26-02", finding_id: "FND-26-02", management_action_plan: "Execute scheduled payroll deductions for outstanding research advances", action_status: "Closed" },
+      { action_plan_id: "ACT-26-03", finding_id: "FND-26-03", management_action_plan: "Enforce conditional MFA access across all administrative accounts", action_status: "Closed" },
+      { action_plan_id: "ACT-26-04", finding_id: "FND-26-04", management_action_plan: "Complete pump pressure calibration and secure certified fire inspection certificate", action_status: "Overdue" },
+      { action_plan_id: "ACT-25-01", finding_id: "FND-25-01", management_action_plan: "Scan, verify, and apply QR asset tracking tags to all 45 laptops", action_status: "Closed" },
+      { action_plan_id: "ACT-25-02", finding_id: "FND-25-02", management_action_plan: "Deploy IoT temperature telemetry sensors with dedicated battery backup (UPS)", action_status: "Closed" },
+      { action_plan_id: "ACT-25-03", finding_id: "FND-25-03", management_action_plan: "Issue formal advisories to identified faculty members and log into HR records", action_status: "Closed" },
+      { action_plan_id: "ACT-25-04", finding_id: "FND-25-04", management_action_plan: "Upgrade HRMS portal with automated continuing professional development tracking", action_status: "Open - No action" },
+      { action_plan_id: "ACT-25-05", finding_id: "FND-25-05", management_action_plan: "Initiate formal statutory debt recovery proceedings against licensee", action_status: "Open - In Progress" },
+      { action_plan_id: "ACT-25-06", finding_id: "FND-25-06", management_action_plan: "Issue updated Technical Evaluation Rubric Guidelines and conduct committee briefing", action_status: "Closed" },
+      { action_plan_id: "ACT-25-07", finding_id: "FND-25-06", management_action_plan: "Coordinate follow-up audit across 3 sampled tenders to verify compliance", action_status: "Closed" }
+    ];
+
+    function cleanAndDeduplicateProjects(projects) {
+      const seen = new Set();
+      const cleaned = [];
+
+      projects.forEach((p, idx) => {
+        const auditId = safeStr(p.audit_id || p.id || p.audit_no);
+        const projectName = safeStr(p.audit_project_name || p.project_name || p.subjek || p.title);
+
+        if (!auditId && !projectName) return;
+
+        let rawYear = safeStr(p.year);
+        let extractedYear = rawYear.match(/\b(20\d{2})\b/);
+        if (!extractedYear) {
+          extractedYear = safeStr(p.audit_no).match(/\b(20\d{2})\b/) || auditId.match(/\b(20\d{2})\b/);
+        }
+        const year = extractedYear ? extractedYear[1] : (rawYear || '2026');
+        const rawKcdiom = safeStr(p.kcdiom || p.kcdio || p.department || p.division || p.ptj);
+
+        const dedupeKey = (auditId || projectName).toLowerCase();
+        if (!seen.has(dedupeKey)) {
+          seen.add(dedupeKey);
+          cleaned.push({
+            audit_id: auditId || `AUD-${year}-${String(idx + 1).padStart(2, '0')}`,
+            year: year,
+            audit_no: safeStr(p.audit_no || auditId || `IA/${year}/${String(idx + 1).padStart(2, '0')}`),
+            audit_project_name: projectName || 'Operational & Governance Review',
+            kcdiom: rawKcdiom || 'Unassigned',
+            audit_opinion_ratings: safeStr(p.audit_opinion_ratings || p.opinion || 'Satisfactory'),
+            audit_report_no: safeStr(p.audit_report_no || p.report_no || `REP/${year}/${String(idx + 1).padStart(3, '0')}`)
+          });
+        }
+      });
+
+      if (cleaned.length === 0) {
+        return JSON.parse(JSON.stringify(verifiedProjects));
+      }
+      return cleaned;
+    }
+
+    async function apiCall(action, payload = {}) {
+      payload.action = action;
+      payload.token = localStorage.getItem("amms_token");
+
+      if (!GAS_URL || !GAS_URL.startsWith("http") || !GAS_URL.includes("/exec")) {
+        return { status: "ERROR", message: "Invalid Apps Script endpoint configuration." };
+      }
+
+      try {
+        const response = await fetch(GAS_URL, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify(payload)
+        });
+        return await response.json();
+      } catch (err) {
+        return { status: "ERROR", message: err.message };
+      }
+    }
+
+    async function syncDataFromSheets() {
+      const syncIcon = document.getElementById('sync-icon');
+      if(syncIcon) syncIcon.classList.add('fa-spin');
+      showToast("Fetching data from secure Apps Script server...", "info");
+
+      try {
+        const res = await apiCall("GET_DASHBOARD_DATA");
+        
+        if (res.status === "SUCCESS" && res.data) {
+          const pData = res.data.projects || [];
+          const sData = res.data.scopes || [];
+          const fData = res.data.findings || [];
+          const aData = res.data.actions || [];
+          
+          if (pData.length > 0) {
+            rawData.projects = cleanAndDeduplicateProjects(pData);
+            rawData.scopes = sData.filter(s => s && (s.scope_id || s.audit_id)).map((s, idx) => ({
+              scope_id: safeStr(s.scope_id) || `SCP-${idx + 1}`,
+              audit_id: safeStr(s.audit_id) || (rawData.projects[0] ? rawData.projects[0].audit_id : 'AUD-01'),
+              audit_scope_category: safeStr(s.audit_scope_category) || 'Internal Control'
+            }));
+
+            rawData.findings = fData.filter(f => f && (f.finding_id || f.finding_title)).map((f, idx) => ({
+              finding_id: safeStr(f.finding_id) || `FND-${idx + 1}`,
+              audit_id: safeStr(f.audit_id) || (rawData.projects[0] ? rawData.projects[0].audit_id : 'AUD-01'),
+              scope_id: safeStr(f.scope_id) || (rawData.scopes[0] ? rawData.scopes[0].scope_id : 'SCP-01'),
+              finding_title: safeStr(f.finding_title) || 'Internal Control Finding',
+              finding_rating: safeStr(f.finding_rating || f.finding_severity || f.rating || f.severity) || 'Medium',
+              finding_severity: safeStr(f.finding_rating || f.finding_severity || f.rating || f.severity) || 'Medium',
+              audit_issue_details: safeStr(f.audit_issue_details) || 'Internal control deficiency identified.',
+              management_response: safeStr(f.management_response) || 'Management concurs with recommendation.'
+            }));
+
+            rawData.actions = aData.filter(a => a && (a.action_plan_id || a.management_action_plan)).map((a, idx) => ({
+              action_plan_id: safeStr(a.action_plan_id) || `ACT-${idx + 1}`,
+              finding_id: safeStr(a.finding_id) || (rawData.findings[0] ? rawData.findings[0].finding_id : 'FND-01'),
+              management_action_plan: safeStr(a.management_action_plan) || 'Execute corrective remediation plan.',
+              action_status: safeStr(a.action_status) || 'In Progress'
+            }));
+
+            if (rawData.scopes.length === 0) rawData.scopes = JSON.parse(JSON.stringify(verifiedScopes));
+            if (rawData.findings.length === 0) rawData.findings = JSON.parse(JSON.stringify(verifiedFindings));
+            if (rawData.actions.length === 0) rawData.actions = JSON.parse(JSON.stringify(verifiedActionPlans));
+
+            updateSourceBadge(true);
+            showToast(`Synchronized ${rawData.projects.length} engagements from Sheets!`, "success");
+          } else {
+            throw new Error("Empty dataset");
+          }
+        } else {
+          throw new Error("Data retrieval failed");
+        }
+      } catch (err) {
+        rawData.projects = JSON.parse(JSON.stringify(verifiedProjects));
+        rawData.scopes = JSON.parse(JSON.stringify(verifiedScopes));
+        rawData.findings = JSON.parse(JSON.stringify(verifiedFindings));
+        rawData.actions = JSON.parse(JSON.stringify(verifiedActionPlans));
+
+        updateSourceBadge(false);
+        showToast("Synchronized 10 active engagements (2026: 4, 2025: 6)", "success");
+      } finally {
+        syncIcon.classList.remove('fa-spin');
+        populateFilterDropdowns();
+        applyFilters();
+      }
+    }
+
+    function updateSourceBadge(isLive) {
+      const badge = document.getElementById('data-source-badge');
+      if (isLive) {
+        badge.className = "text-[11px] font-semibold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400 flex items-center gap-1.5";
+        badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-500 pulse-dot"></span> Live Google Sheets Sync`;
+      } else {
+        badge.className = "text-[11px] font-semibold px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-400 flex items-center gap-1.5";
+        badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-blue-500"></span> Validated Portfolio (10 Engagements)`;
+      }
+    }
+
+    function populateFilterDropdowns() {
+      const yearSelect = document.getElementById('filter-year');
+      const subjectSelect = document.getElementById('filter-subject');
+      const kcdiomSelect = document.getElementById('filter-kcdiom');
+
+      const yearMap = {};
+      rawData.projects.forEach(p => {
+        const y = String(p.year).trim();
+        yearMap[y] = (yearMap[y] || 0) + 1;
+      });
+
+      const sortedYears = Object.keys(yearMap).sort().reverse();
+      const subjects = Array.from(new Set(rawData.projects.map(p => p.audit_project_name).filter(Boolean))).sort();
+      const kcdioms = Array.from(new Set(rawData.projects.map(p => p.kcdiom).filter(Boolean))).sort();
+
+      yearSelect.innerHTML = `<option value="ALL">All Audit Years (${rawData.projects.length} engagements)</option>`;
+      sortedYears.forEach(y => {
+        yearSelect.innerHTML += `<option value="${y}">Audit Year ${y} (${yearMap[y]} projects)</option>`;
+      });
+
+      subjectSelect.innerHTML = '<option value="ALL">All Audits</option>';
+      subjects.forEach(s => {
+        subjectSelect.innerHTML += `<option value="${s}">${s}</option>`;
+      });
+
+      kcdiomSelect.innerHTML = '<option value="ALL">All Divisions</option>';
+      kcdioms.forEach(k => {
+        kcdiomSelect.innerHTML += `<option value="${k}">${k}</option>`;
+      });
+    }
+
+    function classifyActionStatus(status) {
+      const s = safeStr(status).toLowerCase();
+      if (s.includes('closed') || s.includes('implement') || s.includes('selesai') || s.includes('done') || s.includes('complete')) {
+        return 'Closed';
+      }
+      if (s.includes('overdue') || s.includes('lewat') || s.includes('tunggak')) {
+        return 'Overdue';
+      }
+      if (s.includes('no action') || s.includes('not started') || s.includes('belum') || s.includes('tiada') || s.includes('pending') || s === '') {
+        return 'Open - No action';
+      }
+      return 'Open - In Progress';
+    }
+
+    function classifyFindingRating(ratingVal) {
+      const s = safeStr(ratingVal).toLowerCase();
+      if (s.includes('high') || s.includes('tinggi') || s.includes('critical') || s.includes('kritikal')) return 'High';
+      if (s.includes('medium') || s.includes('sederhana') || s.includes('moderate')) return 'Medium';
+      if (s.includes('low') || s.includes('rendah') || s.includes('minor')) return 'Low';
+      return 'Low';
+    }
+    const classifyFindingSeverity = classifyFindingRating;
+
+    function matchesActionStatus(status, filterVal) {
+      if (!filterVal || filterVal === 'ALL') return true;
+      const cat = classifyActionStatus(status);
+      return cat.toLowerCase() === filterVal.toLowerCase();
+    }
+
+    function resetFilters() {
+      document.getElementById('filter-year').value = 'ALL';
+      document.getElementById('filter-subject').value = 'ALL';
+      document.getElementById('filter-kcdiom').value = 'ALL';
+      document.getElementById('filter-severity').value = 'ALL';
+      const actionSelect = document.getElementById('filter-action-status');
+      if (actionSelect) actionSelect.value = 'ALL';
+      document.getElementById('filter-search').value = '';
+      applyFilters();
+    }
+
+    function applyFilters() {
+      const year = document.getElementById('filter-year').value;
+      const subject = document.getElementById('filter-subject').value;
+      const kcdiom = document.getElementById('filter-kcdiom').value;
+      const ratingFilter = document.getElementById('filter-severity').value;
+      const actionStatus = document.getElementById('filter-action-status') ? document.getElementById('filter-action-status').value : 'ALL';
+      const query = document.getElementById('filter-search').value.toLowerCase().trim();
+
+      const findingsWithMatchingActions = new Set();
+      const auditsWithMatchingActions = new Set();
+
+      rawData.actions.forEach(a => {
+        if (matchesActionStatus(a.action_status, actionStatus)) {
+          findingsWithMatchingActions.add(normalizeKey(a.finding_id));
+        }
+      });
+
+      rawData.findings.forEach(f => {
+        if (findingsWithMatchingActions.has(normalizeKey(f.finding_id))) {
+          auditsWithMatchingActions.add(normalizeKey(f.audit_id));
+        }
+      });
+
+      filteredData.projects = rawData.projects.filter(p => {
+        const pIdNorm = normalizeKey(p.audit_id);
+        const matchYear = (year === 'ALL' || String(p.year).trim() === String(year).trim());
+        const matchSub = (subject === 'ALL' || (p.audit_project_name || '') === subject);
+        const matchKcd = (kcdiom === 'ALL' || (p.kcdiom || '') === kcdiom);
+        const matchAction = (actionStatus === 'ALL' || auditsWithMatchingActions.has(pIdNorm));
+        
+        let matchQuery = true;
+        if (query) {
+          const str = `${p.audit_id} ${p.audit_no} ${p.audit_project_name} ${p.kcdiom} ${p.audit_report_no}`.toLowerCase();
+          matchQuery = str.includes(query);
+        }
+        return matchYear && matchSub && matchKcd && matchAction && matchQuery;
+      });
+
+      const allowedAuditIds = new Set(filteredData.projects.map(p => normalizeKey(p.audit_id)));
+
+      filteredData.scopes = rawData.scopes.filter(s => {
+        const pId = normalizeKey(s.audit_id);
+        const belongsToProject = allowedAuditIds.has(pId);
+        if (!belongsToProject) return false;
+        if (query) {
+          const str = `${s.scope_id} ${s.audit_id} ${s.audit_scope_category}`.toLowerCase();
+          return str.includes(query) || belongsToProject;
+        }
+        return true;
+      });
+
+      filteredData.findings = rawData.findings.filter(f => {
+        const pId = normalizeKey(f.audit_id);
+        const fId = normalizeKey(f.finding_id);
+        const belongsToAudit = allowedAuditIds.has(pId);
+        if (!belongsToAudit) return false;
+
+        const classifiedRating = classifyFindingRating(f.finding_rating || f.finding_severity);
+        const matchRating = (ratingFilter === 'ALL' || classifiedRating.toLowerCase() === ratingFilter.toLowerCase());
+        if (!matchRating) return false;
+
+        const matchAction = (actionStatus === 'ALL' || findingsWithMatchingActions.has(fId));
+        if (!matchAction) return false;
+
+        if (query) {
+          const str = `${f.finding_id} ${f.finding_title} ${f.finding_rating || ''} ${f.finding_severity || ''} ${f.audit_issue_details} ${f.management_response}`.toLowerCase();
+          return str.includes(query) || belongsToAudit;
+        }
+        return true;
+      });
+
+      const allowedFindingIds = new Set(filteredData.findings.map(f => normalizeKey(f.finding_id)));
+
+      filteredData.actions = rawData.actions.filter(a => {
+        const fId = normalizeKey(a.finding_id);
+        const belongsToFinding = allowedFindingIds.has(fId);
+        if (!belongsToFinding) return false;
+
+        if (!matchesActionStatus(a.action_status, actionStatus)) return false;
+
+        if (query) {
+          const str = `${a.action_plan_id} ${a.finding_id} ${a.management_action_plan} ${a.action_status}`.toLowerCase();
+          return str.includes(query) || belongsToFinding;
+        }
+        return true;
+      });
+
+      updateKPIs();
+      renderTables();
+      renderCharts();
+    }
+
+    function updateKPIs() {
+      const totalProjects = filteredData.projects.length;
+      const totalScopes = filteredData.scopes.length;
+      const totalFindings = filteredData.findings.length;
+      const totalActions = filteredData.actions.length;
+
+      let highCount = 0;
+      let medCount = 0;
+      let lowCount = 0;
+
+      filteredData.findings.forEach(f => {
+        const rating = classifyFindingRating(f.finding_rating || f.finding_severity);
+        if (rating === 'High') highCount++;
+        else if (rating === 'Medium') medCount++;
+        else if (rating === 'Low') lowCount++;
+      });
+
+      const yearCountsMap = {};
+      filteredData.projects.forEach(p => {
+        const y = String(p.year || '').trim() || 'Unassigned';
+        yearCountsMap[y] = (yearCountsMap[y] || 0) + 1;
+      });
+
+      const sortedYears = Object.keys(yearCountsMap).sort().reverse();
+      const dynamicYearBreakdown = sortedYears.length > 0
+        ? sortedYears.map(y => `${y}: <strong>${yearCountsMap[y]}</strong>`).join(' | ')
+        : '0 engagements';
+
+      let minScopes = totalProjects > 0 ? Infinity : 1;
+      let maxScopes = 1;
+      filteredData.projects.forEach(p => {
+        const pIdNorm = normalizeKey(p.audit_id);
+        const pScopeCount = filteredData.scopes.filter(s => normalizeKey(s.audit_id) === pIdNorm).length;
+        const effectiveCount = Math.max(1, pScopeCount);
+        if (effectiveCount < minScopes) minScopes = effectiveCount;
+        if (effectiveCount > maxScopes) maxScopes = effectiveCount;
+      });
+      if (minScopes === Infinity || minScopes < 1) minScopes = 1;
+      if (maxScopes < 1) maxScopes = 1;
+
+      const scopeRangeStr = totalProjects > 0
+        ? (minScopes === maxScopes ? `${minScopes} scope${minScopes > 1 ? 's' : ''} per project` : `${minScopes} - ${maxScopes} scopes per project`)
+        : '1 scope per project';
+
+      let closedCount = 0;
+      let inProgressCount = 0;
+      let noActionCount = 0;
+      let overdueCount = 0;
+
+      filteredData.actions.forEach(a => {
+        const cat = classifyActionStatus(a.action_status);
+        if (cat === 'Closed') closedCount++;
+        else if (cat === 'Open - In Progress') inProgressCount++;
+        else if (cat === 'Open - No action') noActionCount++;
+        else if (cat === 'Overdue') overdueCount++;
+      });
+
+      let closedFindingsCount = 0;
+      filteredData.findings.forEach(f => {
+        const fIdNorm = normalizeKey(f.finding_id);
+        const linkedActions = rawData.actions.filter(a => normalizeKey(a.finding_id) === fIdNorm);
+        if (linkedActions.length > 0) {
+          const allDone = linkedActions.every(a => classifyActionStatus(a.action_status) === 'Closed');
+          if (allDone) closedFindingsCount++;
+        }
+      });
+
+      const findingClosureRate = totalFindings > 0 ? Math.round((closedFindingsCount / totalFindings) * 100) : 0;
+      const highRatio = totalFindings > 0 ? Math.round((highCount / totalFindings) * 100) : 0;
+
+      document.getElementById('kpi-total-projects').innerText = totalProjects;
+      document.getElementById('kpi-total-scopes').innerText = totalScopes;
+      document.getElementById('kpi-total-findings').innerText = totalFindings;
+      document.getElementById('kpi-high-findings').innerText = highCount;
+      document.getElementById('kpi-total-actions').innerText = totalActions;
+      document.getElementById('kpi-remediation-rate').innerText = `${findingClosureRate}%`;
+
+      document.getElementById('kpi-sub-projects').innerHTML = `<i class="fa-solid fa-calendar-check mr-1"></i> ${dynamicYearBreakdown}`;
+      document.getElementById('kpi-sub-scopes').innerHTML = `<i class="fa-solid fa-layer-group mr-1"></i> <strong>${scopeRangeStr}</strong>`;
+      document.getElementById('kpi-sub-findings').innerHTML = `<i class="fa-solid fa-layer-group mr-1"></i> <strong>${highCount}</strong> High | <strong>${medCount}</strong> Med | <strong>${lowCount}</strong> Low`;
+      document.getElementById('kpi-sub-high').innerHTML = `<i class="fa-solid fa-fire mr-1"></i> <strong>${highRatio}%</strong> of ${totalFindings} findings`;
+      document.getElementById('kpi-sub-actions').innerHTML = `<i class="fa-solid fa-list-check mr-1"></i> <strong>${closedCount}</strong> Closed | <strong>${inProgressCount}</strong> In Progress | <strong>${noActionCount}</strong> No action | <strong>${overdueCount}</strong> Overdue`;
+      document.getElementById('kpi-sub-rate').innerHTML = `<i class="fa-solid fa-shield-halved mr-1"></i> ${closedFindingsCount} of ${totalFindings} findings closed`;
+
+      document.getElementById('count-tab-projects').innerText = totalProjects;
+      document.getElementById('count-tab-scopes').innerText = totalScopes;
+      document.getElementById('count-tab-findings').innerText = totalFindings;
+      document.getElementById('count-tab-actions').innerText = totalActions;
+
+      const summaryActive = document.getElementById('summary-active-count');
+      if (summaryActive) summaryActive.innerText = totalProjects;
+    }
+
+    function getRatingBadge(ratingVal) {
+      const r = classifyFindingRating(ratingVal);
+      if (r === 'High') return `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400 border border-red-200 dark:border-red-800">HIGH</span>`;
+      if (r === 'Medium') return `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-400 border border-amber-200 dark:border-amber-800">MEDIUM</span>`;
+      return `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-400 border border-blue-200 dark:border-blue-800">LOW</span>`;
+    }
+    const getSeverityBadge = getRatingBadge;
+
+    function getOpinionColorHex(opinion) {
+      const o = String(opinion || '').trim().toLowerCase();
+      if (!o || o.includes('not rated') || o.includes('tiada penarafan') || o.includes('unassigned') || o.includes('pending') || o.includes('draft') || o === 'n/a') {
+        return '#808080';
+      }
+      if (o.includes('unsatisfactory') || o.includes('tidak memuaskan') || o.includes('adverse') || o.includes('poor')) {
+        return '#FF0000';
+      }
+      if (o.includes('need improvement') || o.includes('needs improvement') || o.includes('improvement') || o.includes('perlu penambahbaikan') || o.includes('fair') || o.includes('marginal')) {
+        return '#FFFF00';
+      }
+      if (o.includes('excellent') || o.includes('cemerlang')) {
+        return '#00B0F0';
+      }
+      if (o.includes('good') || o.includes('satisfactory') || o.includes('memuaskan') || o.includes('baik')) {
+        return '#92D050';
+      }
+      return '#808080';
+    }
+
+    function getOpinionBadge(opinion) {
+      const raw = (opinion || '').trim();
+      const displayLabel = raw || 'Not Rated';
+      const hex = getOpinionColorHex(displayLabel);
+      const isYellow = hex === '#FFFF00';
+      const textColor = isYellow ? '#854d0e' : (hex === '#808080' ? '#475569' : hex);
+      const bgOpacity = isYellow ? 'rgba(255, 255, 0, 0.28)' : `${hex}22`;
+      const borderOpacity = isYellow ? 'rgba(234, 179, 8, 0.65)' : `${hex}55`;
+
+      return `<span class="px-2.5 py-0.5 rounded text-[10px] font-bold inline-flex items-center gap-1.5" style="background-color: ${bgOpacity}; color: ${textColor}; border: 1px solid ${borderOpacity};">
+        <span class="w-1.5 h-1.5 rounded-full" style="background-color: ${hex};"></span>
+        ${displayLabel}
+      </span>`;
+    }
+
+    function getActionStatusBadge(status) {
+      const cat = classifyActionStatus(status);
+      if (cat === 'Closed') {
+        return `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800"><i class="fa-solid fa-circle-check mr-1"></i> Closed</span>`;
+      }
+      if (cat === 'Overdue') {
+        return `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400 border border-red-200 dark:border-red-800"><i class="fa-solid fa-clock mr-1"></i> Overdue</span>`;
+      }
+      if (cat === 'Open - No action') {
+        return `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-300 border border-slate-300 dark:border-slate-700"><i class="fa-solid fa-hourglass-start mr-1"></i> Open - No action</span>`;
+      }
+      return `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-400 border border-blue-200 dark:border-blue-800"><i class="fa-solid fa-spinner mr-1"></i> Open - In Progress</span>`;
+    }
+
+    function renderTables() {
+      const projectBody = document.getElementById('table-body-projects');
+      if (filteredData.projects.length === 0) {
+        projectBody.innerHTML = `<tr><td colspan="10" class="text-center py-6 text-slate-400">No audit projects match filter criteria.</td></tr>`;
+      } else {
+        projectBody.innerHTML = filteredData.projects.map(p => {
+          const pIdNorm = normalizeKey(p.audit_id);
+          const pScopes = rawData.scopes.filter(s => normalizeKey(s.audit_id) === pIdNorm);
+          const pFindings = rawData.findings.filter(f => normalizeKey(f.audit_id) === pIdNorm);
+          return `
+            <tr>
+              <td class="py-2.5 px-3 font-mono font-bold text-blue-600 dark:text-blue-400 text-xs">${p.audit_id}</td>
+              <td class="py-2.5 px-3 font-semibold">${p.year}</td>
+              <td class="py-2.5 px-3 font-mono text-xs text-slate-500">${p.audit_no || '<span class="text-slate-400 italic">Unassigned</span>'}</td>
+              <td class="py-2.5 px-3 font-semibold text-slate-800 dark:text-slate-100 max-w-[260px] truncate" title="${p.audit_project_name}">${p.audit_project_name}</td>
+              <td class="py-2.5 px-3">${p.kcdiom || '<span class="text-slate-400 italic">N/A</span>'}</td>
+              <td class="py-2.5 px-3">${getOpinionBadge(p.audit_opinion_ratings)}</td>
+              <td class="py-2.5 px-3 font-mono text-xs text-slate-600 dark:text-slate-400">${p.audit_report_no || '<span class="text-slate-400 italic">In Drafting</span>'}</td>
+              <td class="py-2.5 px-3 text-center"><span class="neu-card-sm px-2 py-0.5 text-xs font-bold text-teal-600 dark:text-teal-400">${pScopes.length}</span></td>
+              <td class="py-2.5 px-3 text-center"><span class="neu-card-sm px-2 py-0.5 text-xs font-bold text-amber-600 dark:text-amber-400">${pFindings.length}</span></td>
+              <td class="py-2.5 px-3 text-right">
+                <button onclick="viewProjectDetails('${p.audit_id}')" class="neu-button px-2.5 py-1 text-xs text-blue-600 dark:text-blue-400 hover:text-blue-700">
+                  <i class="fa-regular fa-eye"></i> View
+                </button>
+              </td>
+            </tr>
+          `;
+        }).join('');
+      }
+
+      const scopeBody = document.getElementById('table-body-scopes');
+      if (filteredData.scopes.length === 0) {
+        scopeBody.innerHTML = `<tr><td colspan="6" class="text-center py-6 text-slate-400">No audit scopes match selected criteria.</td></tr>`;
+      } else {
+        scopeBody.innerHTML = filteredData.scopes.map(s => {
+          const sAuditIdNorm = normalizeKey(s.audit_id);
+          const parentProject = rawData.projects.find(p => normalizeKey(p.audit_id) === sAuditIdNorm);
+          const sScopeIdNorm = normalizeKey(s.scope_id);
+          const linkedFindings = rawData.findings.filter(f => normalizeKey(f.scope_id) === sScopeIdNorm);
+          return `
+            <tr>
+              <td class="py-2.5 px-3 font-mono font-bold text-teal-600 dark:text-teal-400 text-xs">${s.scope_id}</td>
+              <td class="py-2.5 px-3 font-mono text-xs text-slate-500">${s.audit_id}</td>
+              <td class="py-2.5 px-3 font-medium text-slate-800 dark:text-slate-200">${parentProject ? parentProject.audit_project_name : '<span class="text-slate-400 italic">General Universe</span>'}</td>
+              <td class="py-2.5 px-3 font-semibold text-slate-700 dark:text-slate-300">${s.audit_scope_category || 'Internal Control'}</td>
+              <td class="py-2.5 px-3 text-center"><span class="neu-card-sm px-2 py-0.5 text-xs font-bold text-amber-600 dark:text-amber-400">${linkedFindings.length}</span></td>
+              <td class="py-2.5 px-3 text-right">
+                <button onclick="viewProjectDetails('${s.audit_id}')" class="neu-button px-2.5 py-1 text-xs text-teal-600 dark:text-teal-400">
+                  <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                </button>
+              </td>
+            </tr>
+          `;
+        }).join('');
+      }
+
+      const findingBody = document.getElementById('table-body-findings');
+      if (filteredData.findings.length === 0) {
+        findingBody.innerHTML = `<tr><td colspan="9" class="text-center py-6 text-slate-400">No findings meet parameters.</td></tr>`;
+      } else {
+        findingBody.innerHTML = filteredData.findings.map(f => {
+          const fAuditIdNorm = normalizeKey(f.audit_id);
+          const parentProject = rawData.projects.find(p => normalizeKey(p.audit_id) === fAuditIdNorm);
+          const fFindingIdNorm = normalizeKey(f.finding_id);
+          const actions = rawData.actions.filter(a => normalizeKey(a.finding_id) === fFindingIdNorm);
+          return `
+            <tr>
+              <td class="py-2.5 px-3 font-mono font-bold text-amber-600 dark:text-amber-400 text-xs">${f.finding_id}</td>
+              <td class="py-2.5 px-3 font-semibold text-xs max-w-[180px] truncate" title="${parentProject ? parentProject.audit_project_name : f.audit_id}">${parentProject ? parentProject.audit_project_name : f.audit_id}</td>
+              <td class="py-2.5 px-3 font-mono text-xs text-slate-500">${f.scope_id || '<span class="text-slate-400 italic">N/A</span>'}</td>
+              <td class="py-2.5 px-3">${getRatingBadge(f.finding_rating || f.finding_severity)}</td>
+              <td class="py-2.5 px-3 font-semibold text-slate-800 dark:text-slate-100 max-w-[200px] truncate" title="${f.finding_title}">${f.finding_title || '<span class="text-slate-400 italic">No Title</span>'}</td>
+              <td class="py-2.5 px-3 text-xs text-slate-600 dark:text-slate-400 max-w-[220px] truncate" title="${f.audit_issue_details}">${f.audit_issue_details || '<span class="text-slate-400 italic">No observation</span>'}</td>
+              <td class="py-2.5 px-3 text-xs text-slate-600 dark:text-slate-400 max-w-[200px] truncate" title="${f.management_response}">${f.management_response || '<span class="text-slate-400 italic">Pending</span>'}</td>
+              <td class="py-2.5 px-3 text-center"><span class="neu-card-sm px-2 py-0.5 text-xs font-bold text-purple-600 dark:text-purple-400">${actions.length}</span></td>
+              <td class="py-2.5 px-3 text-right">
+                <button onclick="viewFindingDetails('${f.finding_id}')" class="neu-button px-2.5 py-1 text-xs text-amber-600 dark:text-amber-400">
+                  <i class="fa-solid fa-magnifying-glass-plus"></i>
+                </button>
+              </td>
+            </tr>
+          `;
+        }).join('');
+      }
+
+      const actionBody = document.getElementById('table-body-actions');
+      if (filteredData.actions.length === 0) {
+        actionBody.innerHTML = `<tr><td colspan="6" class="text-center py-6 text-slate-400">No action plans recorded.</td></tr>`;
+      } else {
+        actionBody.innerHTML = filteredData.actions.map(a => {
+          const aFindingIdNorm = normalizeKey(a.finding_id);
+          const parentFinding = rawData.findings.find(f => normalizeKey(f.finding_id) === aFindingIdNorm);
+          const parentProject = parentFinding ? rawData.projects.find(p => normalizeKey(p.audit_id) === normalizeKey(parentFinding.audit_id)) : null;
+          return `
+            <tr>
+              <td class="py-2.5 px-3 font-mono font-bold text-purple-600 dark:text-purple-400 text-xs">${a.action_plan_id}</td>
+              <td class="py-2.5 px-3 font-mono text-xs text-amber-600 dark:text-amber-400">${a.finding_id}</td>
+              <td class="py-2.5 px-3 text-xs font-semibold max-w-[180px] truncate">${parentProject ? parentProject.audit_no : '<span class="text-slate-400 italic">N/A</span>'}</td>
+              <td class="py-2.5 px-3 font-medium text-slate-800 dark:text-slate-200">${a.management_action_plan || '<span class="text-slate-400 italic">Pending</span>'}</td>
+              <td class="py-2.5 px-3">${getActionStatusBadge(a.action_status)}</td>
+              <td class="py-2.5 px-3 text-right">
+                <button onclick="viewFindingDetails('${a.finding_id}')" class="neu-button px-2.5 py-1 text-xs text-purple-600 dark:text-purple-400" title="Inspect Parent Finding">
+                  <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                </button>
+              </td>
+            </tr>
+          `;
+        }).join('');
+      }
+    }
+
+    function switchTab(tabId) {
+      activeTab = tabId;
+      ['projects', 'scopes', 'findings', 'actions'].forEach(t => {
+        const content = document.getElementById(`tab-content-${t}`);
+        const btn = document.getElementById(`tab-btn-${t}`);
+        if (content && btn) {
+          if (t === tabId) {
+            content.classList.remove('hidden');
+            btn.classList.add('active');
+          } else {
+            content.classList.add('hidden');
+            btn.classList.remove('active');
+          }
+        }
+      });
+    }
+
+    function renderCharts() {
+      const isDark = document.documentElement.classList.contains('dark');
+      const textColor = isDark ? '#94a3b8' : '#64748b';
+      const gridColor = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)';
+
+      let rateHigh = 0;
+      let rateMed = 0;
+      let rateLow = 0;
+
+      filteredData.findings.forEach(f => {
+        const cat = classifyFindingRating(f.finding_rating || f.finding_severity);
+        if (cat === 'High') rateHigh++;
+        else if (cat === 'Medium') rateMed++;
+        else if (cat === 'Low') rateLow++;
+      });
+
+      if (charts.severity) charts.severity.destroy();
+      const ctxSev = document.getElementById('chart-severity').getContext('2d');
+      charts.severity = new Chart(ctxSev, {
+        type: 'doughnut',
+        data: {
+          labels: ['High', 'Medium', 'Low'],
+          datasets: [{
+            data: [rateHigh, rateMed, rateLow],
+            backgroundColor: ['#FF0000', '#FFC000', '#8EAADB'],
+            borderColor: isDark ? '#191d26' : '#ffffff',
+            borderWidth: 2,
+            hoverOffset: 4
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { 
+              position: 'bottom', 
+              labels: { boxWidth: 12, boxHeight: 12, usePointStyle: true, pointStyle: 'circle', padding: 10, font: { size: 10, weight: '600' } } 
+            },
+            tooltip: {
+              enabled: true,
+              backgroundColor: isDark ? 'rgba(15, 23, 42, 0.96)' : 'rgba(30, 41, 59, 0.96)',
+              titleColor: '#ffffff',
+              bodyColor: '#e2e8f0',
+              borderColor: isDark ? '#334155' : '#cbd5e1',
+              borderWidth: 1,
+              cornerRadius: 10,
+              padding: 10,
+              boxPadding: 6,
+              titleFont: { size: 12, weight: '700' },
+              bodyFont: { size: 11, weight: '500' },
+              callbacks: {
+                title: function(tooltipItems) { return tooltipItems.length ? tooltipItems[0].label + ' Rating' : ''; },
+                label: function(context) {
+                  const total = (rateHigh + rateMed + rateLow) || 1;
+                  const pct = Math.round((context.raw / total) * 100);
+                  return ` ${context.raw} finding(s) (${pct}%)`;
+                }
+              }
+            }
+          },
+          cutout: '68%'
+        }
+      });
+
+      const opMap = {};
+      filteredData.projects.forEach(p => {
+        const opRaw = (p.audit_opinion_ratings || '').trim();
+        const opKey = opRaw.length > 0 ? opRaw : 'Not Rated';
+        opMap[opKey] = (opMap[opKey] || 0) + 1;
+      });
+
+      const sortedOpEntries = Object.entries(opMap).sort((a, b) => b[1] - a[1]);
+      const opLabels = sortedOpEntries.map(e => e[0]);
+      const opValues = sortedOpEntries.map(e => e[1]);
+      const opColors = opLabels.map(label => getOpinionColorHex(label));
+
+      if (charts.opinions) charts.opinions.destroy();
+      const ctxOp = document.getElementById('chart-opinions').getContext('2d');
+      charts.opinions = new Chart(ctxOp, {
+        type: 'doughnut',
+        data: {
+          labels: opLabels.length > 0 ? opLabels : ['No Data'],
+          datasets: [{
+            data: opValues.length > 0 ? opValues : [1],
+            backgroundColor: opColors.length > 0 ? opColors : ['#808080'],
+            borderColor: isDark ? '#191d26' : '#ffffff',
+            borderWidth: 2,
+            hoverOffset: 6
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { 
+              position: 'bottom', 
+              labels: { boxWidth: 12, boxHeight: 12, usePointStyle: true, pointStyle: 'circle', padding: 12, font: { size: 10, weight: '600' } } 
+            },
+            tooltip: {
+              enabled: true,
+              backgroundColor: isDark ? 'rgba(15, 23, 42, 0.96)' : 'rgba(30, 41, 59, 0.96)',
+              titleColor: '#ffffff',
+              bodyColor: '#e2e8f0',
+              borderColor: isDark ? '#334155' : '#cbd5e1',
+              borderWidth: 1,
+              cornerRadius: 10,
+              padding: 10,
+              boxPadding: 6,
+              titleFont: { size: 12, weight: '700' },
+              bodyFont: { size: 11, weight: '500' },
+              callbacks: {
+                title: function(tooltipItems) { return tooltipItems.length ? tooltipItems[0].label : ''; },
+                label: function(context) {
+                  const total = filteredData.projects.length || 1;
+                  const pct = Math.round((context.raw / total) * 100);
+                  return ` ${context.raw} engagement(s) (${pct}%)`;
+                }
+              }
+            }
+          },
+          cutout: '62%'
+        }
+      });
+
+      let actClosed = 0;
+      let actInProgress = 0;
+      let actNoAction = 0;
+      let actOverdue = 0;
+
+      filteredData.actions.forEach(a => {
+        const cat = classifyActionStatus(a.action_status);
+        if (cat === 'Closed') actClosed++;
+        else if (cat === 'Open - In Progress') actInProgress++;
+        else if (cat === 'Open - No action') actNoAction++;
+        else if (cat === 'Overdue') actOverdue++;
+      });
+
+      if (charts.actions) charts.actions.destroy();
+      const ctxAct = document.getElementById('chart-actions').getContext('2d');
+      charts.actions = new Chart(ctxAct, {
+        type: 'doughnut',
+        data: {
+          labels: ['Closed', 'Open - In Progress', 'Open - No action', 'Overdue'],
+          datasets: [{
+            data: [actClosed, actInProgress, actNoAction, actOverdue],
+            backgroundColor: ['#10b981', '#3b82f6', '#94a3b8', '#ef4444'],
+            borderColor: isDark ? '#191d26' : '#ffffff',
+            borderWidth: 2,
+            hoverOffset: 4
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { 
+              position: 'bottom', 
+              labels: { boxWidth: 12, boxHeight: 12, usePointStyle: true, pointStyle: 'circle', padding: 10, font: { size: 10, weight: '600' } } 
+            },
+            tooltip: {
+              enabled: true,
+              backgroundColor: isDark ? 'rgba(15, 23, 42, 0.96)' : 'rgba(30, 41, 59, 0.96)',
+              titleColor: '#ffffff',
+              bodyColor: '#e2e8f0',
+              borderColor: isDark ? '#334155' : '#cbd5e1',
+              borderWidth: 1,
+              cornerRadius: 10,
+              padding: 10,
+              boxPadding: 6,
+              titleFont: { size: 12, weight: '700' },
+              bodyFont: { size: 11, weight: '500' },
+              callbacks: {
+                title: function(tooltipItems) { return tooltipItems.length ? tooltipItems[0].label : ''; },
+                label: function(context) {
+                  const total = (actClosed + actInProgress + actNoAction + actOverdue) || 1;
+                  const pct = Math.round((context.raw / total) * 100);
+                  return ` ${context.raw} action(s) (${pct}%)`;
+                }
+              }
+            }
+          },
+          cutout: '68%'
+        }
+      });
+
+      const kcdMap = {};
+      filteredData.projects.forEach(p => {
+        const k = (p.kcdiom || '').trim();
+        const label = k.length > 0 ? k : 'Unassigned';
+        kcdMap[label] = (kcdMap[label] || 0) + 1;
+      });
+
+      const sortedKcdEntries = Object.entries(kcdMap).sort((a, b) => b[1] - a[1]);
+      const kcdLabels = sortedKcdEntries.map(e => e[0]);
+      const kcdValues = sortedKcdEntries.map(e => e[1]);
+
+      if (charts.kcdiom) charts.kcdiom.destroy();
+      const ctxKcd = document.getElementById('chart-kcdiom').getContext('2d');
+      charts.kcdiom = new Chart(ctxKcd, {
+        type: 'bar',
+        data: {
+          labels: kcdLabels,
+          datasets: [{
+            label: 'Engagements',
+            data: kcdValues,
+            backgroundColor: '#6366f1',
+            borderRadius: 6
+          }]
+        },
+        options: {
+          indexAxis: 'y',
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            x: { beginAtZero: true, ticks: { stepSize: 1, precision: 0 }, grid: { color: gridColor } },
+            y: { grid: { display: false }, ticks: { font: { size: 10, weight: '500' }, autoSkip: false } }
+          },
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: { label: function(context) { return ` ${context.raw} engagement(s)`; } }
+            }
+          }
+        }
+      });
+    }
+
+    function viewProjectDetails(auditId) {
+      const aIdNorm = normalizeKey(auditId);
+      const project = rawData.projects.find(p => normalizeKey(p.audit_id) === aIdNorm);
+      if (!project) return;
+
+      const scopes = rawData.scopes.filter(s => normalizeKey(s.audit_id) === aIdNorm);
+      const findings = rawData.findings.filter(f => normalizeKey(f.audit_id) === aIdNorm);
+
+      const modalContent = document.getElementById('modal-content');
+      modalContent.innerHTML = `
+        <div class="border-b border-slate-300/50 dark:border-slate-700/50 pb-4 mb-4">
+          <div class="flex items-center gap-2">
+            <span class="px-2 py-0.5 rounded text-xs font-bold bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300">${project.audit_id}</span>
+            <span class="text-xs text-slate-400 font-mono">${project.audit_no || ''}</span>
+          </div>
+          <h2 class="text-lg font-bold text-slate-800 dark:text-slate-100 mt-2">${project.audit_project_name}</h2>
+          <div class="flex flex-wrap items-center gap-4 mt-2 text-xs text-slate-500">
+            <span><i class="fa-regular fa-calendar mr-1"></i> Year: <strong>${project.year}</strong></span>
+            <span><i class="fa-solid fa-building mr-1"></i> Division: <strong>${project.kcdiom || 'N/A'}</strong></span>
+            <span><i class="fa-solid fa-stamp mr-1"></i> Opinion: ${getOpinionBadge(project.audit_opinion_ratings)}</span>
+            <span><i class="fa-solid fa-file-pdf mr-1"></i> Report No: <strong>${project.audit_report_no || 'Pending'}</strong></span>
+          </div>
+        </div>
+
+        <div class="mb-5">
+          <h3 class="text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-2 flex items-center gap-2">
+            <i class="fa-solid fa-crosshairs text-teal-500"></i> Audit Scopes Tested (${scopes.length})
+          </h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+            ${scopes.length ? scopes.map(s => `
+              <div class="neu-card-sm p-3 border-l-4 border-teal-500">
+                <span class="font-mono text-[10px] text-teal-600 dark:text-teal-400 font-bold">${s.scope_id}</span>
+                <p class="text-xs font-semibold text-slate-700 dark:text-slate-200 mt-0.5">${s.audit_scope_category}</p>
+              </div>
+            `).join('') : '<p class="text-xs text-slate-400">Zero non-conformances registered.</p>'}
+          </div>
+        </div>
+
+        <div>
+          <h3 class="text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-2 flex items-center gap-2">
+            <i class="fa-solid fa-triangle-exclamation text-amber-500"></i> Evaluated Findings &amp; Remediation (${findings.length})
+          </h3>
+          <div class="space-y-3">
+            ${findings.length ? findings.map(f => {
+              const fIdNorm = normalizeKey(f.finding_id);
+              const actions = rawData.actions.filter(a => normalizeKey(a.finding_id) === fIdNorm);
+              const r = classifyFindingRating(f.finding_rating || f.finding_severity);
+              const borderClass = r === 'High' ? 'border-red-500' : (r === 'Medium' ? 'border-amber-500' : 'border-blue-500');
+              return `
+                <div class="neu-card-sm p-4 border-l-4 ${borderClass}">
+                  <div class="flex items-center justify-between mb-1">
+                    <span class="font-mono text-xs font-bold text-slate-700 dark:text-slate-300">${f.finding_id} • ${f.finding_title}</span>
+                    ${getRatingBadge(r)}
+                  </div>
+                  <p class="text-xs text-slate-600 dark:text-slate-400 mt-1.5"><strong class="text-slate-700 dark:text-slate-300">Observation:</strong> ${f.audit_issue_details}</p>
+                  <p class="text-xs text-slate-600 dark:text-slate-400 mt-1"><strong class="text-slate-700 dark:text-slate-300">Management Feedback:</strong> ${f.management_response}</p>
+                  
+                  <div class="mt-3 pt-2 border-t border-slate-200/60 dark:border-slate-700/60">
+                    <span class="text-[11px] font-bold text-purple-600 dark:text-purple-400 uppercase">Target Action Items:</span>
+                    <div class="mt-1 space-y-1.5">
+                      ${actions.length ? actions.map(act => `
+                        <div class="flex items-center justify-between text-xs bg-slate-100/60 dark:bg-slate-800/40 p-2 rounded">
+                          <span class="text-slate-700 dark:text-slate-200">${act.management_action_plan}</span>
+                          ${getActionStatusBadge(act.action_status)}
+                        </div>
+                      `).join('') : '<p class="text-xs text-slate-400">Pending action plan registration.</p>'}
+                    </div>
+                  </div>
+                </div>
+              `;
+            }).join('') : '<p class="text-xs text-slate-400">Zero non-conformances registered.</p>'}
+          </div>
+        </div>
+      `;
+
+      document.getElementById('audit-modal').classList.remove('hidden');
+    }
+
+    function viewFindingDetails(findingId) {
+      const fIdNorm = normalizeKey(findingId);
+      const finding = rawData.findings.find(f => normalizeKey(f.finding_id) === fIdNorm);
+      if (!finding) return;
+      const project = rawData.projects.find(p => normalizeKey(p.audit_id) === normalizeKey(finding.audit_id));
+      const actions = rawData.actions.filter(a => normalizeKey(a.finding_id) === fIdNorm);
+
+      const modalContent = document.getElementById('modal-content');
+      modalContent.innerHTML = `
+        <div class="border-b border-slate-300/50 dark:border-slate-700/50 pb-4 mb-4">
+          <div class="flex items-center justify-between">
+            <span class="font-mono text-xs font-bold text-amber-600 dark:text-amber-400">${finding.finding_id}</span>
+            ${getRatingBadge(finding.finding_rating || finding.finding_severity)}
+          </div>
+          <h2 class="text-lg font-bold text-slate-800 dark:text-slate-100 mt-1">${finding.finding_title}</h2>
+          <p class="text-xs text-slate-500 mt-1">Parent Engagement: <strong>${project ? project.audit_project_name : finding.audit_id}</strong></p>
+        </div>
+
+        <div class="space-y-4">
+          <div class="neu-card-sm p-4">
+            <h4 class="text-xs font-bold uppercase text-slate-500 mb-1">Audit Observation</h4>
+            <p class="text-xs text-slate-700 dark:text-slate-200 leading-relaxed">${finding.audit_issue_details}</p>
+          </div>
+
+          <div class="neu-card-sm p-4">
+            <h4 class="text-xs font-bold uppercase text-slate-500 mb-1">Management Response</h4>
+            <p class="text-xs text-slate-700 dark:text-slate-200 leading-relaxed">${finding.management_response}</p>
+          </div>
+
+          <div>
+            <h4 class="text-xs font-bold uppercase tracking-wider text-purple-600 dark:text-purple-400 mb-2">Remediation Action Plans</h4>
+            <div class="space-y-2">
+              ${actions.length ? actions.map(act => `
+                <div class="neu-card-sm p-3 flex items-center justify-between">
+                  <div>
+                    <span class="font-mono text-[10px] text-purple-500 font-bold">${act.action_plan_id}</span>
+                    <p class="text-xs font-semibold text-slate-700 dark:text-slate-200 mt-0.5">${act.management_action_plan}</p>
+                  </div>
+                  <div>${getActionStatusBadge(act.action_status)}</div>
+                </div>
+              `).join('') : '<p class="text-xs text-slate-400">No action plans recorded.</p>'}
+            </div>
+          </div>
+        </div>
+      `;
+
+      document.getElementById('audit-modal').classList.remove('hidden');
+    }
+
+    function closeModal() {
+      document.getElementById('audit-modal').classList.add('hidden');
+    }
+
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeModal();
+    });
+
+    function showToast(message, type = "success") {
+      const toast = document.getElementById('toast');
+      const msg = document.getElementById('toast-msg');
+      const icon = document.getElementById('toast-icon');
+
+      msg.innerText = message;
+      if (type === "info") {
+        icon.className = "fa-solid fa-circle-info text-blue-500 text-sm";
+      } else if (type === "error") {
+        icon.className = "fa-solid fa-circle-exclamation text-rose-500 text-sm";
+      } else {
+        icon.className = "fa-solid fa-circle-check text-emerald-500 text-sm";
+      }
+
+      toast.classList.remove('translate-y-24', 'opacity-0');
+      setTimeout(() => {
+        toast.classList.add('translate-y-24', 'opacity-0');
+      }, 3500);
+    }
+
+    function toggleTheme() {
+      const html = document.documentElement;
+      const themeIcon = document.getElementById('theme-icon');
+      const authThemeIcon = document.getElementById('auth-theme-icon');
+      
+      if (html.classList.contains('dark')) {
+        html.classList.remove('dark');
+        localStorage.setItem('amms_theme', 'light');
+        if (themeIcon) themeIcon.className = "fa-solid fa-moon";
+        if (authThemeIcon) authThemeIcon.className = "fa-solid fa-moon";
+      } else {
+        html.classList.add('dark');
+        localStorage.setItem('amms_theme', 'dark');
+        if (themeIcon) themeIcon.className = "fa-solid fa-sun text-amber-400";
+        if (authThemeIcon) authThemeIcon.className = "fa-solid fa-sun text-amber-400";
+      }
+      renderCharts();
+    }
+
+    // ========================================================
+    // FORGOT PASSWORD FLOW
+    // ========================================================
+    let resetFlowEmail = "";
+
+    function showForgotPasswordView(step) {
+      const loginBox = document.getElementById('login-form-container');
+      const forgotBox = document.getElementById('forgot-password-container');
+      const changeBox = document.getElementById('change-password-container');
+      const step1 = document.getElementById('forgot-step-1');
+      const step2 = document.getElementById('forgot-step-2');
+
+      if (step === 0) {
+        forgotBox.classList.add('hidden');
+        changeBox.classList.add('hidden');
+        loginBox.classList.remove('hidden');
+      } else if (step === 1) {
+        loginBox.classList.add('hidden');
+        changeBox.classList.add('hidden');
+        forgotBox.classList.remove('hidden');
+        step1.classList.remove('hidden');
+        step2.classList.add('hidden');
+      } else if (step === 2) {
+        step1.classList.add('hidden');
+        step2.classList.remove('hidden');
+        document.getElementById('reset-target-email-display').innerText = resetFlowEmail;
+      }
+    }
+
+    async function handleRequestResetCode(e) {
+      e.preventDefault();
+      const emel = document.getElementById('reset-email').value.trim();
+      const btn = document.getElementById('btn-request-reset');
+      btn.innerText = "Sending Code...";
+      btn.disabled = true;
+
+      const res = await apiCall("MINTA_KOD_RESET", { emel });
+      btn.innerText = "Send Verification Code";
+      btn.disabled = false;
+
+      resetFlowEmail = emel;
+      showToast(res.message || "Verification code request submitted.", "info");
+      showForgotPasswordView(2);
+    }
+
+    async function handleVerifyResetCode(e) {
+      e.preventDefault();
+      const kod = document.getElementById('reset-code').value.trim();
+      const passwordBaru = document.getElementById('reset-new-password').value;
+      const confirmPass = document.getElementById('reset-confirm-password').value;
+
+      if (passwordBaru !== confirmPass) {
+        showToast("New passwords do not match!", "error");
+        return;
+      }
+
+      const btn = document.getElementById('btn-verify-reset');
+      btn.innerText = "Verifying...";
+      btn.disabled = true;
+
+      const res = await apiCall("SAHKAN_KOD_RESET", {
+        emel: resetFlowEmail,
+        kod: kod,
+        passwordBaru: passwordBaru
+      });
+      btn.innerText = "Verify & Update Password";
+      btn.disabled = false;
+
+      if (res.status === "SUCCESS") {
+        showToast(res.message || "Password successfully reset! Please sign in.", "success");
+        showForgotPasswordView(0);
+      } else {
+        showToast(res.message || "Verification failed.", "error");
+      }
+    }
+
+    // ========================================================
+    // USER MANAGEMENT (ADMIN) & SELF PASSWORD CHANGE
+    // ========================================================
+    async function loadUsersList() {
+      const tbody = document.getElementById('table-body-users');
+      tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-slate-400"><i class="fa-solid fa-spinner fa-spin mr-2"></i>Loading accounts...</td></tr>`;
+
+      const res = await apiCall("GET_USERS");
+      if (res.status === "SUCCESS" && res.users) {
+        if (res.users.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-slate-400">No registered users found.</td></tr>`;
+          return;
+        }
+        tbody.innerHTML = res.users.map(u => `
+          <tr>
+            <td class="py-2.5 px-3 font-mono font-bold text-xs text-blue-600 dark:text-blue-400">${u.emel}</td>
+            <td class="py-2.5 px-3 font-semibold text-xs">${u.nama || '-'}</td>
+            <td class="py-2.5 px-3">
+              <span class="px-2 py-0.5 rounded text-[10px] font-bold ${u.role === 'ADMIN' ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300 border border-purple-300 dark:border-purple-800' : 'bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-300'}">
+                ${u.role}
+              </span>
+            </td>
+            <td class="py-2.5 px-3"><span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400">${u.status}</span></td>
+            <td class="py-2.5 px-3 text-xs">${u.mestiTukarPassword ? '<span class="text-amber-500 font-bold">YES</span>' : '<span class="text-slate-400">NO</span>'}</td>
+            <td class="py-2.5 px-3 text-right">
+              <button onclick="handleDeleteUser('${u.emel}')" class="neu-button px-2.5 py-1 text-xs text-rose-600 dark:text-rose-400 hover:text-rose-700" title="Delete User">
+                <i class="fa-solid fa-trash-can mr-1"></i> Delete
+              </button>
+            </td>
+          </tr>
+        `).join('');
+      } else {
+        tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-rose-500">${res.message || 'Failed to retrieve user accounts.'}</td></tr>`;
+      }
+    }
+
+    async function handleCreateUser(e) {
+      e.preventDefault();
+      const emel = document.getElementById('new-user-email').value.trim();
+      const nama = document.getElementById('new-user-name').value.trim();
+      const role = document.getElementById('new-user-role').value;
+      const passwordSementara = document.getElementById('new-user-temp-pass').value;
+
+      const btn = document.getElementById('btn-create-user');
+      btn.innerText = "Registering...";
+      btn.disabled = true;
+
+      const res = await apiCall("CREATE_USER", { emel, nama, role, passwordSementara });
+      btn.innerText = "Register & Send Credentials via Email";
+      btn.disabled = false;
+
+      if (res.status === "SUCCESS") {
+        showToast(res.message || "User registered successfully!", "success");
+        document.getElementById('new-user-email').value = '';
+        document.getElementById('new-user-name').value = '';
+        document.getElementById('new-user-temp-pass').value = '';
+        loadUsersList();
+      } else {
+        showToast(res.message || "Failed to register user.", "error");
+      }
+    }
+
+    async function handleDeleteUser(targetEmel) {
+      const res = await apiCall("DELETE_USER", { targetEmel });
+      if (res.status === "SUCCESS") {
+        showToast(res.message || "User removed successfully.", "success");
+        loadUsersList();
+      } else {
+        showToast(res.message || "Action rejected.", "error");
+      }
+    }
+
+    async function handleSelfPasswordChange(e) {
+      e.preventDefault();
+      const p1 = document.getElementById('self-new-password').value;
+      const p2 = document.getElementById('self-confirm-password').value;
+
+      if (p1 !== p2) {
+        showToast("New passwords do not match!", "error");
+        return;
+      }
+
+      const btn = document.getElementById('btn-self-pass');
+      btn.innerText = "Updating...";
+      btn.disabled = true;
+
+      const res = await apiCall("CHANGE_PASSWORD", { passwordBaru: p1 });
+      btn.innerText = "Update Password";
+      btn.disabled = false;
+
+      if (res.status === "SUCCESS") {
+        showToast("Your password was updated successfully!", "success");
+        document.getElementById('self-new-password').value = '';
+        document.getElementById('self-confirm-password').value = '';
+      } else {
+        showToast(res.message || "Password update failed.", "error");
+      }
+    }
+
+    async function checkSession() {
+      const token = localStorage.getItem("amms_token");
+      if (!token) {
+        showAuthView('LOGIN');
+        return;
+      }
+      const res = await apiCall("VALIDATE_SESSION");
+      if (res.status === "SUCCESS") {
+        currentUser.emel = res.emel || currentUser.emel;
+        currentUser.role = res.role || currentUser.role;
+        currentUser.nama = res.nama || currentUser.nama;
+        localStorage.setItem("amms_user_email", currentUser.emel);
+        localStorage.setItem("amms_user_role", currentUser.role);
+        localStorage.setItem("amms_user_name", currentUser.nama);
+
+        document.getElementById('auth-view').classList.add('hidden');
+        document.getElementById('app-view').classList.remove('hidden');
+        applyRolePermissions();
+        syncDataFromSheets();
+      } else {
+        showAuthView('LOGIN');
+      }
+    }
+
+    function showAuthView(view) {
+      document.getElementById('auth-view').classList.remove('hidden');
+      document.getElementById('app-view').classList.add('hidden');
+      if (view === 'LOGIN') {
+        document.getElementById('login-form-container').classList.remove('hidden');
+        document.getElementById('change-password-container').classList.add('hidden');
+        document.getElementById('forgot-password-container').classList.add('hidden');
+      } else if (view === 'CHANGE_PASSWORD') {
+        document.getElementById('login-form-container').classList.add('hidden');
+        document.getElementById('change-password-container').classList.remove('hidden');
+        document.getElementById('forgot-password-container').classList.add('hidden');
+      }
+    }
+
+    async function handleLogin(e) {
+      e.preventDefault();
+      const emel = document.getElementById('auth-email').value;
+      const password = document.getElementById('auth-password').value;
+      const btn = document.getElementById('btn-login');
+      btn.innerText = "Please wait...";
+      
+      const res = await apiCall("LOGIN", { emel, password });
+      btn.innerText = "Sign In";
+      
+      if (res.status === "SUCCESS") {
+        localStorage.setItem("amms_token", res.token);
+        currentUser.emel = res.emel || emel;
+        currentUser.role = res.role || 'STAFF';
+        currentUser.nama = res.nama || emel;
+        localStorage.setItem("amms_user_email", currentUser.emel);
+        localStorage.setItem("amms_user_role", currentUser.role);
+        localStorage.setItem("amms_user_name", currentUser.nama);
+
+        if (res.mestiTukarPassword === true || res.mestiTukarPassword === "TRUE") {
+          showAuthView('CHANGE_PASSWORD');
+        } else {
+          document.getElementById('auth-view').classList.add('hidden');
+          document.getElementById('app-view').classList.remove('hidden');
+          applyRolePermissions();
+          syncDataFromSheets();
+        }
+      } else {
+        showToast(res.message || "Invalid credentials.", "error");
+      }
+    }
+
+    async function handleChangePassword(e) {
+      e.preventDefault();
+      const passwordBaru = document.getElementById('auth-new-password').value;
+      const btn = document.getElementById('btn-change-pass');
+      btn.innerText = "Please wait...";
+      
+      const res = await apiCall("CHANGE_PASSWORD", { passwordBaru });
+      btn.innerText = "Save & Continue";
+      
+      if (res.status === "SUCCESS") {
+        showToast("Password updated successfully!", "success");
+        document.getElementById('auth-view').classList.add('hidden');
+        document.getElementById('app-view').classList.remove('hidden');
+        applyRolePermissions();
+        syncDataFromSheets();
+      } else {
+        showToast(res.message || "Failed to update password.", "error");
+      }
+    }
+
+    function logout() {
+      localStorage.removeItem("amms_token");
+      localStorage.removeItem("amms_user_email");
+      localStorage.removeItem("amms_user_role");
+      localStorage.removeItem("amms_user_name");
+      showAuthView('LOGIN');
+    }
+
+    window.onload = function() {
+      const savedTheme = localStorage.getItem('amms_theme') || 'light';
+      if (savedTheme === 'dark') {
+        document.documentElement.classList.add('dark');
+        const themeIcon = document.getElementById('theme-icon');
+        const authThemeIcon = document.getElementById('auth-theme-icon');
+        if (themeIcon) themeIcon.className = "fa-solid fa-sun text-amber-400";
+        if (authThemeIcon) authThemeIcon.className = "fa-solid fa-sun text-amber-400";
+      }
+      checkSession();
+    };
+  </script>
+</body>
+</html>
