@@ -738,7 +738,7 @@
             <tr>
               <th class="py-2.5 px-3">Scope ID</th>
               <th class="py-2.5 px-3">Audit ID</th>
-              <th class="py-2.5 px-3">Parent Project Ref</th>
+              <th class="py-2.5 px-3">Audit Project Ref</th>
               <th class="py-2.5 px-3">Scope Category</th>
               <th class="py-2.5 px-3 text-center">Findings</th>
               <th class="py-2.5 px-3 text-right">Inspect</th>
@@ -901,6 +901,53 @@
     </div>
   </div>
 
+  <!-- ================= EDIT USER MODAL (ADMIN ONLY) ================= -->
+  <div id="edit-user-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm hidden">
+    <div class="neu-card w-full max-w-md p-6 relative">
+      <button onclick="closeEditUserModal()" class="absolute top-5 right-5 neu-button w-8 h-8 flex items-center justify-center text-slate-500 hover:text-red-500" title="Close Modal">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+      <div class="border-b border-slate-300/40 dark:border-slate-700/50 pb-3 mb-4">
+        <h3 class="text-base font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
+          <i class="fa-solid fa-user-pen text-blue-500"></i> Edit User Profile
+        </h3>
+        <p class="text-xs text-slate-500 mt-0.5">Modify role, full name, and account access status.</p>
+      </div>
+      <form onsubmit="handleSaveEditUser(event)" class="space-y-3.5">
+        <div>
+          <label class="block text-[11px] font-semibold text-slate-500 dark:text-slate-400 mb-1">User Email ID (Read-only)</label>
+          <input type="email" id="edit-user-email" readonly class="neu-input w-full px-3 py-2 text-xs opacity-75 cursor-not-allowed bg-slate-100/50 dark:bg-slate-800/50 font-mono font-bold">
+        </div>
+        <div>
+          <label class="block text-[11px] font-semibold text-slate-500 dark:text-slate-400 mb-1">Full Name</label>
+          <input type="text" id="edit-user-name" required placeholder="User's full name" class="neu-input w-full px-3 py-2 text-xs">
+        </div>
+        <div>
+          <label class="block text-[11px] font-semibold text-slate-500 dark:text-slate-400 mb-1">Assigned Role</label>
+          <select id="edit-user-role" class="neu-input w-full px-3 py-2 text-xs">
+            <option value="ADMIN">ADMIN (Full Administrator)</option>
+            <option value="STAFF">STAFF (Viewer / Auditee)</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-[11px] font-semibold text-slate-500 dark:text-slate-400 mb-1">Account Access Status</label>
+          <select id="edit-user-status" class="neu-input w-full px-3 py-2 text-xs">
+            <option value="ACTIVE">ACTIVE (Authorized Access)</option>
+            <option value="INACTIVE">INACTIVE (Access Suspended)</option>
+          </select>
+        </div>
+        <div class="pt-2 flex justify-end gap-2">
+          <button type="button" onclick="closeEditUserModal()" class="neu-button px-3 py-1.5 text-xs font-semibold text-slate-600 dark:text-slate-300">
+            Cancel
+          </button>
+          <button type="submit" id="btn-save-edit-user" class="neu-button px-4 py-1.5 text-xs font-bold text-white bg-blue-600 hover:bg-blue-500 rounded-lg flex items-center gap-1.5 shadow-md shadow-blue-500/20">
+            <i class="fa-solid fa-floppy-disk"></i> Save Changes
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <!-- Toast Notification -->
   <div id="toast" class="fixed bottom-5 right-5 neu-card px-4 py-3 text-xs font-semibold flex items-center gap-2 transform translate-y-24 opacity-0 transition-all duration-300 z-50">
     <i id="toast-icon" class="fa-solid fa-circle-check text-emerald-500 text-sm"></i>
@@ -972,7 +1019,8 @@
         navBtnSet.classList.add('active', 'text-blue-600', 'dark:text-blue-400');
         navBtnSet.classList.remove('text-slate-600', 'dark:text-slate-300');
         applyRolePermissions();
-        if (currentUser.role === 'ADMIN') {
+        const userRole = String(currentUser.role || 'STAFF').toUpperCase();
+        if (userRole.includes('ADMIN')) {
           loadUsersList();
         }
       }
@@ -983,11 +1031,14 @@
       const adminSection = document.getElementById('admin-users-section');
       const roleBadge = document.getElementById('header-user-role');
       const nameBadge = document.getElementById('header-user-name');
+      const userRole = String(currentUser.role || 'STAFF').toUpperCase();
+      const isAdmin = userRole.includes('ADMIN');
+
       if (roleBadge) roleBadge.innerText = currentUser.role || 'STAFF';
       if (nameBadge) nameBadge.innerText = currentUser.nama || currentUser.emel || '';
 
       if (adminSection) {
-        if (currentUser.role === 'ADMIN') {
+        if (isAdmin) {
           adminSection.classList.remove('hidden');
         } else {
           adminSection.classList.add('hidden');
@@ -2107,12 +2158,15 @@
     // ========================================================
     // USER MANAGEMENT (ADMIN) & SELF PASSWORD CHANGE
     // ========================================================
+    let loadedUsersList = [];
+
     async function loadUsersList() {
       const tbody = document.getElementById('table-body-users');
       tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-slate-400"><i class="fa-solid fa-spinner fa-spin mr-2"></i>Loading accounts...</td></tr>`;
 
       const res = await apiCall("GET_USERS");
       if (res.status === "SUCCESS" && res.users) {
+        loadedUsersList = res.users;
         if (res.users.length === 0) {
           tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-slate-400">No registered users found.</td></tr>`;
           return;
@@ -2120,23 +2174,84 @@
         tbody.innerHTML = res.users.map(u => `
           <tr>
             <td class="py-2.5 px-3 font-mono font-bold text-xs text-blue-600 dark:text-blue-400">${u.emel}</td>
-            <td class="py-2.5 px-3 font-semibold text-xs">${u.nama || '-'}</td>
+            <td class="py-2.5 px-3 font-semibold text-xs text-slate-800 dark:text-slate-200">${u.nama || '-'}</td>
             <td class="py-2.5 px-3">
-              <span class="px-2 py-0.5 rounded text-[10px] font-bold ${u.role === 'ADMIN' ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300 border border-purple-300 dark:border-purple-800' : 'bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-300'}">
+              <span class="px-2 py-0.5 rounded text-[10px] font-bold ${String(u.role).toUpperCase().includes('ADMIN') ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300 border border-purple-300 dark:border-purple-800' : 'bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-300'}">
                 ${u.role}
               </span>
             </td>
-            <td class="py-2.5 px-3"><span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400">${u.status}</span></td>
+            <td class="py-2.5 px-3">
+              <span class="px-2 py-0.5 rounded text-[10px] font-bold ${String(u.status || '').toUpperCase() === 'ACTIVE' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400' : 'bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-400'}">
+                ${u.status || 'ACTIVE'}
+              </span>
+            </td>
             <td class="py-2.5 px-3 text-xs">${u.mestiTukarPassword ? '<span class="text-amber-500 font-bold">YES</span>' : '<span class="text-slate-400">NO</span>'}</td>
             <td class="py-2.5 px-3 text-right">
-              <button onclick="handleDeleteUser('${u.emel}')" class="neu-button px-2.5 py-1 text-xs text-rose-600 dark:text-rose-400 hover:text-rose-700" title="Delete User">
-                <i class="fa-solid fa-trash-can mr-1"></i> Delete
-              </button>
+              <div class="inline-flex items-center gap-1.5 justify-end">
+                <button onclick="openEditUserModal('${u.emel}')" class="neu-button px-2.5 py-1 text-xs text-blue-600 dark:text-blue-400 hover:text-blue-700" title="Edit User">
+                  <i class="fa-solid fa-user-pen mr-1"></i> Edit
+                </button>
+                <button onclick="handleDeleteUser('${u.emel}')" class="neu-button px-2.5 py-1 text-xs text-rose-600 dark:text-rose-400 hover:text-rose-700" title="Delete User">
+                  <i class="fa-solid fa-trash-can mr-1"></i> Delete
+                </button>
+              </div>
             </td>
           </tr>
         `).join('');
       } else {
         tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-rose-500">${res.message || 'Failed to retrieve user accounts.'}</td></tr>`;
+      }
+    }
+
+    function openEditUserModal(emel) {
+      const user = loadedUsersList.find(u => String(u.emel).toLowerCase() === String(emel).toLowerCase());
+      if (!user) return;
+
+      document.getElementById('edit-user-email').value = user.emel;
+      document.getElementById('edit-user-name').value = user.nama || '';
+      
+      const roleSelect = document.getElementById('edit-user-role');
+      const userRoleUpper = String(user.role || 'STAFF').toUpperCase();
+      roleSelect.value = userRoleUpper.includes('ADMIN') ? 'ADMIN' : 'STAFF';
+
+      const statusSelect = document.getElementById('edit-user-status');
+      statusSelect.value = String(user.status || 'ACTIVE').toUpperCase() === 'INACTIVE' ? 'INACTIVE' : 'ACTIVE';
+
+      document.getElementById('edit-user-modal').classList.remove('hidden');
+    }
+
+    function closeEditUserModal() {
+      document.getElementById('edit-user-modal').classList.add('hidden');
+    }
+
+    async function handleSaveEditUser(e) {
+      e.preventDefault();
+      const targetEmel = document.getElementById('edit-user-email').value.trim();
+      const nama = document.getElementById('edit-user-name').value.trim();
+      const role = document.getElementById('edit-user-role').value;
+      const status = document.getElementById('edit-user-status').value;
+
+      const btn = document.getElementById('btn-save-edit-user');
+      btn.innerText = "Saving...";
+      btn.disabled = true;
+
+      const res = await apiCall("UPDATE_USER", { targetEmel, nama, role, status });
+      btn.innerText = "Save Changes";
+      btn.disabled = false;
+
+      if (res.status === "SUCCESS") {
+        showToast(res.message || "User profile updated successfully!", "success");
+        closeEditUserModal();
+        if (targetEmel.toLowerCase() === currentUser.emel.toLowerCase()) {
+          currentUser.nama = nama;
+          currentUser.role = role;
+          localStorage.setItem("amms_user_name", nama);
+          localStorage.setItem("amms_user_role", role);
+          applyRolePermissions();
+        }
+        loadUsersList();
+      } else {
+        showToast(res.message || "Failed to update user profile.", "error");
       }
     }
 
